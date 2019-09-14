@@ -132,4 +132,7 @@ $autoload['language'] = array();
 |
 |	$autoload['model'] = array('first_model' => 'first');
 */
-$autoload['model'] = array('Mvalidate_input');
+$autoload['model'] = array(
+	'Mvalidate_input',
+	'Mo_sb'
+);
