@@ -12,6 +12,7 @@ class User extends REST_Controller
     public function __construct()
     {
         parent::__construct();
+        header("Access-Control-Allow-Origin: *");
     }
 
     private function _cek_user($where)
@@ -66,7 +67,7 @@ class User extends REST_Controller
                     'pesan'  => $data['pesan'],
                 ),
             );
-            $this->response($this->arr_result, 422);
+            $this->response($this->arr_result);
             exit;
         } else {
             return $input;
