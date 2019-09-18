@@ -15,7 +15,7 @@ class User extends REST_Controller
         header("Access-Control-Allow-Origin: *");
     }
 
-    private function _cek_user($where)
+    private function _cek_user($where = null)
     {
         return $this->Mo_sb->mengambil('user', $where);
     }
@@ -45,16 +45,16 @@ class User extends REST_Controller
             $data['pesan']  = 'Repassword tidak cocok dengan password!';
         } else {
             $q = $this->_cek_user(array(
-                'email' => $input['email']
+                'email' => $input['email'],
             ));
 
             $q2 = $this->_cek_user(array(
-                'phone' => $input['phone']
+                'phone' => $input['phone'],
             ));
             if ($q->num_rows() == true) {
                 $data['status'] = 'gagal';
                 $data['pesan']  = 'Email sudah digunakan!';
-            }elseif ($q2->num_rows() == true) {
+            } elseif ($q2->num_rows() == true) {
                 $data['status'] = 'gagal';
                 $data['pesan']  = 'No. Hp sudah digunakan!';
             }
@@ -90,6 +90,94 @@ class User extends REST_Controller
             'prilude' => array(
                 'status' => $q['status'],
                 'pesan'  => ucwords($q['status']) . ' mendaftar',
+            ),
+        );
+        $this->response($this->arr_result);
+        exit;
+    }
+
+    private function _login_validate($user_role_id)
+    {
+        $input          = $this->post();
+        $data['status'] = '';
+        $data['pesan']  = '';
+        if (@$input['email'] == null) {
+            $data['status'] = 'gagal';
+            $data['pesan']  = 'Email tidak boleh kosong!';
+        } elseif (@$input['password'] == null) {
+            $data['status'] = 'gagal';
+            $data['pesan']  = 'Password tidak boleh kosong!';
+        } else {
+            $this->db->group_start();
+            $this->db->where('email', $input['email']);
+            $this->db->or_where('phone', $input['email']);
+            $this->db->group_end();
+            $this->db->where('user_role_id', $user_role_id);
+            $q = $this->_cek_user();
+            if ($q->num_rows() != true) {
+                $data['status'] = 'gagal';
+                $data['pesan']  = 'Akun tidak ditemukan!';
+            } elseif (@$q->row()->user_status_id != 1) {
+                $data['status'] = 'gagal';
+                $data['pesan']  = 'Akun sedang tidak aktif/suspend!';
+            } elseif (@$q->row()->password != md5(@$input['password'])) {
+                $data['status'] = 'gagal';
+                $data['pesan']  = 'Password Salah!';
+            }
+        }
+
+        if ($data['status'] == 'gagal') {
+            $this->arr_result = array(
+                'prilude' => array(
+                    'status' => $data['status'],
+                    'pesan'  => $data['pesan'],
+                ),
+            );
+            $this->response($this->arr_result);
+            exit;
+        } else {
+            return $input;
+        }
+    }
+
+    public function login_post($user_role_id = 2)
+    {
+        $hasil = $this->_login_validate($user_role_id);
+        $this->db->group_start();
+        $this->db->where('email', $hasil['email']);
+        $this->db->or_where('phone', $hasil['email']);
+        $this->db->group_end();
+        $this->db->where('user_role_id', $user_role_id);
+        $q                = $this->_cek_user();
+        $data['status']   = 'berhasil';
+        $data['pesan']    = 'Berhasil masuk ke aplikasi!';
+        $hasilnya         = $q->row();
+        $this->arr_result = array(
+            'prilude' => array(
+                'status' => $data['status'],
+                'pesan'  => $data['pesan'],
+                'detail' => array(
+                    'userID'    => md5($hasilnya->user_id),
+                    'full_name' => $hasilnya->full_name,
+                    'verification_number' => $hasilnya->verification_number,
+                ),
+            ),
+        );
+        $this->response($this->arr_result);
+        exit;
+    }
+
+    public function logout_post()
+    {
+        $input = $this->post();
+        $q     = $this->Mo_sb->mengubah('user', array('md5(user_id)' => $input['userID']), array(
+            'last_login' => date('Y-m-d H:i:s'),
+        ));
+
+        $this->arr_result = array(
+            'prilude' => array(
+                'status' => 'berhasil',
+                'pesan'  => 'Berhasil logout',
             ),
         );
         $this->response($this->arr_result);
