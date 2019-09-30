@@ -19,7 +19,7 @@ class Setting extends REST_Controller
     {
         // $input = $this->post();
 
-        $q = $this->Mo_sb->mengambil('setting',array('setting_id'=> 1) ) ;
+        $q = $this->Mo_sb->mengambil('setting',array('setting_id'=> 7) ) ;
 
         if ($q->num_rows() > 0) {
 
