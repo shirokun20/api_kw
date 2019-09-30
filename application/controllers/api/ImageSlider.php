@@ -1,34 +1,28 @@
 <?php
-
 defined('BASEPATH') or exit('No direct script access allowed');
-
 use Restserver\Libraries\REST_Controller;
 
 require APPPATH . 'libraries/REST_Controller.php';
-
 require APPPATH . 'libraries/Format.php';
 
-class Product_category extends REST_Controller
+class ImageSlider extends REST_Controller
 {
-    private $arr_result  = array();
-    
+    private $arr_result = array();
+
     public function __construct()
     {
         parent::__construct();
         header("Access-Control-Allow-Origin: *");
-        $this->load->model('Mproduct_category');
-
     }
 
-    public function ambil_category_all_get()
+     public function ambil_image_all_get()
     {
         $input = $this->post();
-
-        $q     = $this->Mproduct_category->allCategory();
+        $q     = $this->Mo_sb->mengambil('image_slider');
 
         if ($q->num_rows() > 0 ){
-            
-            $this->arr_result = array(
+        	
+        	$this->arr_result = array(
             'prilude' => array(
                 'status' => 'berhasil',
                 'data'   =>  $q->result(),
@@ -37,8 +31,8 @@ class Product_category extends REST_Controller
         );
 
         }else{
-            
-            $this->arr_result = array(
+        	
+        	$this->arr_result = array(
             'prilude' => array(
                 'status' => 'gagal',
                 'pesan'  => 'Data Tidak Ada',
@@ -52,5 +46,7 @@ class Product_category extends REST_Controller
         $this->response($this->arr_result);
         // exit;
     }
+
+
 
 }
