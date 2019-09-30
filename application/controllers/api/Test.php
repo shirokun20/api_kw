@@ -16,6 +16,7 @@ class Test extends REST_Controller {
 	{
 		parent::__construct();
         header("Access-Control-Allow-Origin: *");
+        $this->load->library('Libkirim_email');
 	}
 
 	public function index_get()
@@ -36,6 +37,21 @@ class Test extends REST_Controller {
 			)
 		);
         $this->response($this->arr_result);
+	}
+
+	public function mengirim_post()
+	{
+		$input = $this->post();
+		$datanya['email'] = $input['email'];
+		$datanya['subject'] = $input['subject'];
+		$datanya['message'] = $input['message'];
+		$q = $this->libkirim_email->kirim($datanya);
+		$this->arr_result = array(
+			'prilude' => array(
+				'status' => $q['status'],
+			)
+		);
+        $this->response($this->arr_result);	
 	}
 }
 
