@@ -1,38 +1,57 @@
 <?php
 defined('BASEPATH') or exit('No direct script access allowed');
+use Restserver\Libraries\REST_Controller;
 
-class Layanan extends CI_Controller
+require APPPATH . 'libraries/REST_Controller.php';
+require APPPATH . 'libraries/Format.php';
+
+class Layanan extends REST_Controller
 {
-
+    private $arr_result = array();
+    private $link = 'http://www.prilude.com/apps/klikwaw/kwkonsumen/static/media/';
     public function __construct()
     {
         parent::__construct();
-        //Load Dependencies
-
+    	header("Access-Control-Allow-Origin: *");
+        $this->load->library('Libkirim_email');
     }
 
-    // List all your items
-    public function index($offset = 0)
+    public function index_get()
     {
-
+    	$q = $this->Mo_sb->mengambil('services');
+    	$json = array();
+    	foreach ($q->result() as $key) {
+    		$r = array();
+    		$r['services_id'] = $key->services_id;
+    		$r['services_name'] = $key->services_name;
+    		$r['image'] = $this->link . $key->image;
+    		$json[] = $r;
+    	}
+    	$this->arr_result = array(
+            'prilude' => array(
+                'data' => $json,
+            ),
+        );
+        $this->response($this->arr_result);
     }
 
-    // Add a new item
-    public function add()
+    public function kategori_get()
     {
-
-    }
-
-    //Update one item
-    public function update($id = null)
-    {
-
-    }
-
-    //Delete one item
-    public function delete($id = null)
-    {
-
+    	$input = $this->get();
+    	$q = $this->Mo_sb->mengambil('category', $input);
+    	$json = array();
+    	foreach ($q->result() as $key) {
+    		$r = array();
+    		$r['category_id'] = $key->category_id;
+    		$r['category_name'] = $key->category_name;
+    		$json[] = $r;
+    	}
+    	$this->arr_result = array(
+            'prilude' => array(
+                'data' => $json,
+            ),
+        );
+        $this->response($this->arr_result);
     }
 }
 
