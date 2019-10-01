@@ -15,11 +15,42 @@ class Setting extends REST_Controller
         header("Access-Control-Allow-Origin: *");
     }
 
-    public function ambil_setting_all_get()
+    public function ambil_setting_all7_get()
     {
         // $input = $this->post();
 
-        $q = $this->Mo_sb->mengambil('setting',array('setting_id'=> 1) ) ;
+        $q = $this->Mo_sb->mengambil('setting',array('setting_id'=> 7) ) ;
+
+        if ($q->num_rows() > 0) {
+
+            $this->arr_result   = array(
+                    'prilude'   => array(
+                        'status'    => 'berhasil',
+                        'data'      => $q->result(),
+                )
+            );
+
+            } else {
+
+                $this->arr_result = array(
+                    'prilude' => array(
+                        'status' => 'gagal',
+                        'pesan'  => 'Data Tidak Ada',
+                    ),
+                );
+
+            }
+
+            $this->response($this->arr_result);
+            exit;
+        }
+
+
+            public function ambil_setting_all8_get()
+    {
+        // $input = $this->post();
+
+        $q = $this->Mo_sb->mengambil('setting',array('setting_id'=> 8) ) ;
 
         if ($q->num_rows() > 0) {
 
