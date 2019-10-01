@@ -14,9 +14,12 @@ class Mproduct extends CI_Model
     public function allProduct($product_id = null)
     {
         $this->db->select('p.*');
-        $this->db->select('pi.image_link');
+        $this->db->select('pi.image_link,c.category_name,s.services_name');
         $this->db->join('product_image pi', 'pi.product_id = p.product_id');
+        $this->db->join('category c', 'c.category_id = p.category_id');
+        $this->db->join('services s', 's.services_id = c.services_id');
         $this->db->group_by('p.product_id');
+        
         if($product_id !== null){
             $this->db->where('p.product_id', $product_id);
         }

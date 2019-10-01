@@ -37,9 +37,8 @@ class Product extends REST_Controller
 
         } else {
 
-            $q = $this->Mproduct->allProduct();
+            $q           = $this->Mproduct->allProduct();
             $query_image = $this->Mproduct->product_image();
-
 
         }
 
@@ -66,23 +65,39 @@ class Product extends REST_Controller
         }
 
         $this->response($this->arr_result);
-        exit;
+        // exit;
     }
 
-    public function product_()
+    public function ambil_product_trending_get()
     {
-        if (!$this->get('id')) {
-            //query parameter, example, websites?id=1
-            $this->response(null, 400);
-        }
 
-        $website = $this->wm->get_website($this->get('id'));
+        $q           = $this->Mproduct->allProduct();
+        $query_image = $this->Mproduct->product_image();
 
-        if ($website) {
-            $this->response($website, 200); // 200 being the HTTP response code
+        if ($q->num_rows() > 0) {
+
+            $this->arr_result = array(
+                'prilude' => array(
+                    'status'        => 'berhasil',
+                    'data'          => $q->result(),
+                    'product_image' => $query_image->result(),
+                    'pesan'         => 'Berhasil mengambil data',
+                ),
+            );
+
         } else {
-            $this->response(array(), 500);
+
+            $this->arr_result = array(
+                'prilude' => array(
+                    'status' => 'gagal',
+                    'pesan'  => 'Data Tidak Ada',
+                ),
+            );
+
         }
+
+        $this->response($this->arr_result);
+        // exit;
     }
 
 }
