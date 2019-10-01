@@ -1,13 +1,8 @@
 <?php
 defined('BASEPATH') or exit('No direct script access allowed');
+
 class Mproduct extends CI_Model
 {
-    private $table                  = "product";
-    private $key_product_id         = "product_id";
-    private $key_product_name       = "product_name";
-    private $table_product_category = "sub_category";
-    private $field_list             = array('product_id', 'product_name', 'description');
-    private $exception_field        = array();
 
     public function __construct()
     {
@@ -16,83 +11,60 @@ class Mproduct extends CI_Model
     }
 
     //mendaptakan semua data produk tanpa filter apapun.
-    public function findAll()
+    public function allProduct($product_id = null)
     {
-        return $this->db->get('product')->result();
-    }
-    /*
-    Untuk melakukan pencarian data product
-     */
-    public function finds($keyword, $option, $product_id)
-    {
-        $this->db->select($this->table . '.*');
-        if (trim($keyword) != "") {
-            $this->db->like($this->key_product_name, $keyword);
+        $this->db->select('p.*');
+        $this->db->select('pi.image_link');
+        $this->db->join('product_image pi', 'pi.product_id = p.product_id');
+        $this->db->group_by('p.product_id');
+        if($product_id !== null){
+            $this->db->where('p.product_id', $product_id);
         }
 
-        if ($product_id != 0) {
-            $this->db->where_in($this->table . '.' . $this->key_product_id, $product_id);
-        }
-
-        if (array_key_exists('order', $option)) {
-            $this->db->order_by($this->table . "." . $option['order']['order_by'], $option['order']['ordering']);
-        }
-
-        if ($option != null) {
-            if (array_key_exists('limit', $option)) {
-                $this->db->limit($this->table . "." . $option['limit']);
-            }
-
-            if (array_key_exists('order_by', $option)) {
-                $this->db->order_by($this->table . "." . $option['order_by']['field'], $option['order_by']['option']);
-            }
-
-            if (array_key_exists('page', $option)) {
-                $page = $option['page'] * $option['limit'];
-                $this->db->limit($option['limit'], $page);
-            }
-
-            if (array_key_exists('where_in', $option)) {
-                $this->db->where_in($this->table . '.' . $option['where_in']['field'], $option['where_in']['option']);
-            }
-
-            if (array_key_exists('where_not_in', $option)) {
-                $this->db->where_not_in($this->table . '.' . $option['where_not_in']['field'], $option['where_not_in']['option']);
-            }
-        }
-
-        $data_product = $this->db->get($this->table)->result();
-
-        $array_data = array();
-        foreach ($data_product as $product) {
-            $query = array(
-                $this->key_product_id => $product->product_id,
-            );
-
-            if (count($data_image) == 0) {
-                $new_array = array(
-                    'data_product' => $product,
-                );
-            } else {
-                $new_array = array(
-                    'data_product' => $product,
-                );
-            }
-
-            array_push($array_data, $new_array);
-        }
-
-        //array_push($data_product,$data_image);
-        //return $data_image;
-        return $array_data;
+        $result = $this->db->get('product p');
+        return $result;
     }
 
-    public function allProduct($limit = null , $page = null)
+    public function product_image($product_id = null)
     {
-        $offset = $page * $limit;
-        $sql    = "SELECT * FROM product";
+        $this->db->select('pi.*');
 
-        $result = $this->db->query($sql)->result();
+        if($product_id !== null){
+            $this->db->where('pi.product_id', $product_id);
+        }
+
+        $result = $this->db->get('product_image pi');
+        return $result;
+    }
+
+
+    //mendaptakan semua data produk best seller tanpa filter apapun.
+    public function product_best_seller_get($product_id = null)
+    {
+        $this->db->select('p.*');
+        $this->db->select('pi.image_link');
+        $this->db->join('product_image pi', 'pi.product_id = p.product_id');
+
+        if($product_id !== null){
+            $this->db->where('p.product_id', $product_id);
+        }
+
+        $result = $this->db->get('product p');
+        return $result;
+    }
+
+    //mendaptakan semua data produk best rekomended  tanpa filter apapun.
+    public function product_recomended_get($product_id = null)
+    {
+        $this->db->select('p.*');
+        $this->db->select('pi.image_link');
+        $this->db->join('product_image pi', 'pi.product_id = p.product_id');
+
+        if($product_id !== null){
+            $this->db->where('p.product_id', $product_id);
+        }
+
+        $result = $this->db->get('product p');
         return $result;
     }
 
