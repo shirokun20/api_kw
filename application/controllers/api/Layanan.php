@@ -53,6 +53,34 @@ class Layanan extends REST_Controller
         );
         $this->response($this->arr_result);
     }
+
+    public function layanan_kategori_get()
+    {
+        $q = $this->Mo_sb->mengambil('services');
+        $json = array();
+        foreach ($q->result() as $key) {
+            $r = array();
+            $r['services_id'] = $key->services_id;
+            $r['services_name'] = $key->services_name;
+            $r['image'] = $this->link . $key->image;
+            $json_2 = array();
+            $q2 = $this->Mo_sb->mengambil('category', array('services_id' => $r['services_id']));
+            foreach ($q2->result() as $apaYah) {
+                $r2 = array();
+                $r2['category_id'] = $apaYah->category_id;
+                $r2['category_name'] = $apaYah->category_name;
+                $json_2[] = $r2;
+            }
+            $r['detail'] = $json_2;
+            $json[] = $r;
+        }
+        $this->arr_result = array(
+            'prilude' => array(
+                'data' => $json,
+            ),
+        );
+        $this->response($this->arr_result);
+    }
 }
 
 /* End of file Layanan.php */
