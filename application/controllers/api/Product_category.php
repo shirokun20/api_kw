@@ -10,8 +10,8 @@ require APPPATH . 'libraries/Format.php';
 
 class Product_category extends REST_Controller
 {
-    private $arr_result  = array();
-    
+    private $arr_result = array();
+
     public function __construct()
     {
         parent::__construct();
@@ -22,35 +22,38 @@ class Product_category extends REST_Controller
 
     public function ambil_category_all_get()
     {
-        $input = $this->post();
+        if ($this->get('cat_id') !== null) {
 
-        $q     = $this->Mproduct_category->allCategory();
+            $q = $this->Mproduct_category->all_category(20);
 
-        if ($q->num_rows() > 0 ){
-            
+        } else {
+            $q = $this->Mproduct_category->all_category(20);
+        }
+
+        if ($q->num_rows() > 0) {
+
             $this->arr_result = array(
-            'prilude' => array(
-                'status' => 'berhasil',
-                'data'   =>  $q->result(),
-                'pesan'  => 'Berhasil mengambil data',
-            )
-        );
+                'prilude' => array(
+                    'status' => 'berhasil',
+                    'data'   => $q->result(),
+                    'pesan'  => 'Berhasil mengambil data',
+                ),
+            );
 
-        }else{
-            
+        } else {
+
             $this->arr_result = array(
-            'prilude' => array(
-                'status' => 'gagal',
-                'pesan'  => 'Data Tidak Ada',
-            )
-        );
+                'prilude' => array(
+                    'status' => 'gagal',
+                    'pesan'  => 'Data Tidak Ada',
+                    'data'   => null
+                ),
+            );
 
         }
 
-        
-
         $this->response($this->arr_result);
-        // exit;
+        exit;
     }
 
 }
