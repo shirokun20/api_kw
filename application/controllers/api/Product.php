@@ -100,4 +100,35 @@ class Product extends REST_Controller
         // exit;
     }
 
+    public function product_category_get()
+    {
+        $input = $this->get();
+        $where = null;
+        if (@$input['category_id'] != null) {
+            $where['category_id'] = $input['category_id'];
+        }
+        $where['is_active'] = '1';
+        $q     = $this->Mo_sb->mengambil('product', $where);
+        $json  = array();
+        foreach ($q->result() as $key) {
+            $r                     = array();
+            $r['product_id']       = $key->product_id;
+            $r['product_name']     = ucwords($key->product_name);
+            $r['description']      = $key->description;
+            $r['category_id']      = $key->category_id;
+            $r['is_gratis_ongkir'] = $key->is_gratis_ongkir;
+            $r['is_active']        = $key->is_active;
+            $r['price']            = number_format($key->price + 0, 2, ',', '.');
+            $r['discount']         = $key->discount + 0;
+            $json[]                = $r;
+        }
+
+        $this->arr_result = array(
+            'prilude' => array(
+                'data' => $json,
+            ),
+        );
+        $this->response($this->arr_result);
+    }
+
 }
