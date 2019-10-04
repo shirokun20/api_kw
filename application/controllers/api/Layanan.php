@@ -25,6 +25,7 @@ class Layanan extends REST_Controller
     		$r['services_id'] = $key->services_id;
     		$r['services_name'] = $key->services_name;
     		$r['image'] = $this->link . $key->image;
+            $r['services_name_string'] = $this->toStringUniq($key->services_name);
     		$json[] = $r;
     	}
     	$this->arr_result = array(
@@ -43,7 +44,8 @@ class Layanan extends REST_Controller
     	foreach ($q->result() as $key) {
     		$r = array();
     		$r['category_id'] = $key->category_id;
-    		$r['category_name'] = $key->category_name;
+            $r['category_name'] = $key->category_name;
+    		$r['category_name_string'] = $this->toStringUniq($key->category_name);
     		$json[] = $r;
     	}
     	$this->arr_result = array(
@@ -54,14 +56,22 @@ class Layanan extends REST_Controller
         $this->response($this->arr_result);
     }
 
+    private function toStringUniq($value)
+    {
+        $hasil = str_replace(' ', '-', strtolower($value));
+        return $hasil;
+    }
+
     public function layanan_kategori_get()
     {
         $q = $this->Mo_sb->mengambil('services');
         $json = array();
         foreach ($q->result() as $key) {
             $r = array();
+            $string = 
             $r['services_id'] = $key->services_id;
             $r['services_name'] = $key->services_name;
+            $r['services_name_string'] = $this->toStringUniq($key->services_name);
             $r['image'] = $this->link . $key->image;
             $json_2 = array();
             $q2 = $this->Mo_sb->mengambil('category', array('services_id' => $r['services_id']));
@@ -69,6 +79,7 @@ class Layanan extends REST_Controller
                 $r2 = array();
                 $r2['category_id'] = $apaYah->category_id;
                 $r2['category_name'] = $apaYah->category_name;
+                $r2['category_name_string'] = $this->toStringUniq($apaYah->category_name);
                 $json_2[] = $r2;
             }
             $r['detail'] = $json_2;
