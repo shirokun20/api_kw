@@ -22,9 +22,9 @@ class Product_category extends REST_Controller
 
     public function ambil_category_all_get()
     {
-        if ($this->get('cat_id') !== null) {
+        if ($this->get('cat_id') !== '') {
 
-            $q = $this->Mproduct_category->all_category(20);
+            $q = $this->Mproduct_category->all_category($this->get('cat_id'));
 
         } else {
             $q = $this->Mproduct_category->all_category(20);
