@@ -26,7 +26,7 @@ class Cart extends REST_Controller
 
     }
 
-    private function switch_cart($user_id, $type, $data)
+    private function switch_cart($user_id, $type, $data = NULL)
     {
         switch ($type) {
             case 'TAMBAH_ITEM':
@@ -62,6 +62,28 @@ class Cart extends REST_Controller
                 ));
                 return $q;
                 break;
+            case 'AMBIL_CART':
+            	$q = $this->Mo_sb->mengambil('cart_product', array(
+            		'user_id' => $user_id,
+            	));
+            	$json = array();
+            	foreach ($q->result() as $key) {
+            		$r = array();
+            		$r['product_id'] = $key->product_id;
+            		$r['product_name'] = $key->product_name;
+            		$r['price'] = (int) $key->price;
+            		$r['diskon'] = $key->diskon;
+            		$r['kategori'] = $key->kategori;
+            		$r['image_product'] = $key->image_product;
+            		$r['qty'] = (int) $key->qty;
+            		$json[] = $r;
+            	}
+
+            	return array(
+            		'barangNya' => $json, 
+            	);
+
+            	break;
             default:
                 return array(
                     'status' => 'gagal',
@@ -81,6 +103,19 @@ class Cart extends REST_Controller
             ),
         );
         $this->response($this->arr_result);
+    }
+
+    public function ambil_get()
+    {
+    	$input = $this->get();
+        $userID           = $this->Mo_sb->mengambil('user', array('md5(user_id)' => $input['user_id']));
+        $hasil = $this->switch_cart($userID->row()->user_id, $input['type']);
+    	$this->arr_result = array(
+    	    'prilude' => array(
+    	        'data' => $hasil,
+    	    ),
+    	);
+    	$this->response($this->arr_result);
     }
 }
 
