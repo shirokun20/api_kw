@@ -71,4 +71,23 @@ class Mproduct extends CI_Model
         return $result;
     }
 
+    //mendaptakan semua data produk berdasarkan layanan
+    public function product_by_layanan_get($services_id = null)
+    {
+        $this->db->select('p.*');
+        $this->db->select('pi.image_link,c.services_id,s.services_name');
+        $this->db->join('product_image pi', 'pi.product_id = p.product_id');
+        $this->db->join('category c', 'c.category_id = p.category_id');
+        $this->db->join('services s', 's.services_id = c.services_id');
+        $this->db->group_by('p.product_id');
+
+
+        if($services_id !== null){
+            $this->db->where($services_id);
+        }
+
+        $result = $this->db->get('product p');
+        return $result;
+    }
+
 }
