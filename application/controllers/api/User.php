@@ -203,4 +203,18 @@ class User extends REST_Controller
         exit;
     }
 
+    public function ambil_user_get()
+    {
+        $input = $this->get();
+        $q = $this->Mo_sb->mengambil('user', array(
+            'md5(user_id)' => $input['user_id']
+        ));
+        $this->arr_result = array(
+            'prilude' => array(
+                'data' => $q->result(),
+            ),
+        );
+        $this->response($this->arr_result);
+    }
+
 }
