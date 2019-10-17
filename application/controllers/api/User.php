@@ -21,6 +21,23 @@ class User extends REST_Controller
         return $this->Mo_sb->mengambil('user', $where);
     }
 
+    public function profil_user_get()
+    {
+        $input = $this->get();
+
+        $q = $this->_cek_user(array(
+            'md5(user_id)' => $input['user_id']
+        ));
+
+        $this->arr_result = array(
+            'prilude' => array(
+                'user_detail'  => $q->result(),
+            ),
+        );
+        $this->response($this->arr_result);
+        exit;
+    }
+
     private function validasi()
     {
         $input          = $this->post();

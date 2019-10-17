@@ -76,4 +76,35 @@ class Setting extends REST_Controller
             exit;
         }
 
+    public function ambil_data_bank_get()
+    {
+        // $input = $this->post();
+        $where = '2';
+        $this->db->where_not_in('payment_method_id',  $where);
+        $q = $this->Mo_sb->mengambil('payment_method') ;
+
+        if ($q->num_rows() > 0) {
+
+            $this->arr_result   = array(
+                    'prilude'   => array(
+                        'status'    => 'berhasil',
+                        'data'      => $q->result(),
+                )
+            );
+
+            } else {
+
+                $this->arr_result = array(
+                    'prilude' => array(
+                        'status' => 'gagal',
+                        'pesan'  => 'Data Tidak Ada',
+                    ),
+                );
+
+            }
+
+            $this->response($this->arr_result);
+            exit;
+        }
+
     }
