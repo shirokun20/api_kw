@@ -56,6 +56,20 @@ class Order extends REST_Controller
         exit;
     }
 
+    public function amkw_get()
+    {
+    	$q = $this->Mo_sb->mengambil('shipping_method', array('shipping_method_id >' => 1));
+    	$q2 = $this->Mo_sb->mengambil('shipping_timing');
+    	$this->arr_result = array(
+            'prilude' => array(
+                'metode_kirim' => $q->result(),
+                'waktu_kirim'  => $q2->result(),
+            ),
+        );
+        $this->response($this->arr_result);
+        exit;
+    }
+
 }
 
 /* End of file Order.php */
