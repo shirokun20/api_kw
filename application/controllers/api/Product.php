@@ -114,6 +114,7 @@ class Product extends REST_Controller
         $where = null;
         if (@$input['category_id'] != null) {
             $where['p.category_id'] = $input['category_id'];
+            $where['p.is_active'] = 1;
         }
         // $where['p.is_active'] = '1';
         $q     = $this->_product_category($where);
@@ -147,6 +148,7 @@ class Product extends REST_Controller
         $where = null;
         if (@$input['services_id'] != null) {
             $where['c.services_id'] = $input['services_id'];
+            $where['p.is_active'] = 1;
         }
 
         $q = $this->Mproduct->product_by_layanan_get($where);
