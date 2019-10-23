@@ -18,6 +18,7 @@ class Mproduct extends CI_Model
         $this->db->join('product_image pi', 'pi.product_id = p.product_id');
         $this->db->join('category c', 'c.category_id = p.category_id');
         $this->db->join('services s', 's.services_id = c.services_id');
+        $this->db->where('is_active', 1);
         $this->db->group_by('p.product_id');
         
         if($product_id !== null){
