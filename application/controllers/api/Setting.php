@@ -79,7 +79,7 @@ class Setting extends REST_Controller
     public function ambil_data_bank_get()
     {
         // $input = $this->post();
-        $where = '1';
+        $where = array('1', '4');
         $this->db->where_not_in('payment_method_id',  $where);
         $q = $this->Mo_sb->mengambil('payment_method') ;
 

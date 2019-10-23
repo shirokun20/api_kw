@@ -15,6 +15,29 @@ class Morder extends CI_Model
         }
         return $this->db->get('merchant m');
     }
+
+
+    public function noUnik($userid = null)
+    {
+        $year = date('Y');
+        $this->db->select('MAX(RIGHT(no_order,5)) AS kd_max');
+        if ($userid != null) {
+            $this->db->where('buyer_user_id',$userid);
+            $this->db->where('YEAR(created_time)', $year);
+        }
+        $q  = $this->db->get('product_order');
+        $kd = "";
+        if ($q->num_rows() > 0) {
+            foreach ($q->result() as $k) {
+                $tmp = ((int) $k->kd_max) + 1;
+                $kd  = sprintf("%05s", $tmp);
+            }
+        } else {
+            $kd = "00001";
+        }
+        // date_default_timezone_set('Asia/Jakarta');
+        return 'ORDER/' . $userid . '/' . $year .'/' . $kd;
+    }
 }
 
 /* End of file Morder.php */

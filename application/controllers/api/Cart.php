@@ -35,6 +35,7 @@ class Cart extends REST_Controller
                 $cek              = $this->Mo_sb->mengambil('cart_product', array(
                     'product_id' => $hasil['product_id'],
                     'user_id'    => $hasil['user_id'],
+                    'is_cart'    => '1',
                 ));
 
                 if ($cek->num_rows() == false) {
@@ -43,6 +44,7 @@ class Cart extends REST_Controller
                     $q = $this->Mo_sb->mengubah('cart_product', array(
                         'user_id'    => $hasil['user_id'],
                         'product_id' => $hasil['product_id'],
+                        'is_cart'    => '1'
                     ), $hasil);
                 }
                 return $q;
@@ -52,6 +54,7 @@ class Cart extends REST_Controller
                 $q     = $this->Mo_sb->mengubah('cart_product', array(
                     'user_id'    => $user_id,
                     'product_id' => $hasil['product_id'],
+                    'is_cart'    => '1'
                 ), $hasil);
                 return $q;
                 break;
@@ -59,12 +62,14 @@ class Cart extends REST_Controller
                 $q = $this->Mo_sb->menghapus('cart_product', array(
                     'product_id' => $data['product_id'],
                     'user_id'    => $user_id,
+                    'is_cart'    => '1'
                 ));
                 return $q;
                 break;
             case 'AMBIL_CART':
             	$q = $this->Mo_sb->mengambil('cart_product', array(
             		'user_id' => $user_id,
+                    'is_cart' => '1',
             	));
             	$json = array();
             	foreach ($q->result() as $key) {
@@ -72,7 +77,7 @@ class Cart extends REST_Controller
             		$r['product_id'] = $key->product_id;
             		$r['product_name'] = $key->product_name;
             		$r['price'] = (int) $key->price;
-            		$r['diskon'] = $key->diskon;
+            		$r['diskon'] = (int) $key->diskon;
             		$r['kategori'] = $key->kategori;
             		$r['image_product'] = $key->image_product;
             		$r['qty'] = (int) $key->qty;
