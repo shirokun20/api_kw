@@ -177,4 +177,17 @@ class Product extends REST_Controller
         $this->response($this->arr_result);
     }
 
+    public function pencarian_get()
+    {
+        $input = $this->get();
+        $this->db->like('p.product_name', $input['cari']);
+        $this->db->where('p.is_active', '1');
+        $q = $this->_product_category();
+        $this->arr_result = array(
+            'prilude' => array(
+                'data' => $q->result(),
+            ),
+        );
+        $this->response($this->arr_result);
+    }
 }

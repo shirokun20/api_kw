@@ -11,18 +11,22 @@ class Mproduct extends CI_Model
     }
 
     //mendaptakan semua data produk tanpa filter apapun.
-    public function allProduct($product_id = null)
+    public function allProduct($product_id = null, $limit = null)
     {
         $this->db->select('p.*');
         $this->db->select('pi.image_link,c.category_name,s.services_name');
-        $this->db->join('product_image pi', 'pi.product_id = p.product_id');
-        $this->db->join('category c', 'c.category_id = p.category_id');
-        $this->db->join('services s', 's.services_id = c.services_id');
+        $this->db->join('product_image pi', 'pi.product_id = p.product_id', 'left');
+        $this->db->join('category c', 'c.category_id = p.category_id', 'left');
+        $this->db->join('services s', 's.services_id = c.services_id', 'left');
         $this->db->where('is_active', 1);
         $this->db->group_by('p.product_id');
         
         if($product_id !== null){
             $this->db->where('p.product_id', $product_id);
+        }
+
+        if ($limit == null) {
+            $this->db->limit(12);
         }
 
         $result = $this->db->get('product p');
