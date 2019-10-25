@@ -16,13 +16,12 @@ class Morder extends CI_Model
         return $this->db->get('merchant m');
     }
 
-
     public function noUnik($userid = null)
     {
         $year = date('Y');
         $this->db->select('MAX(RIGHT(no_order,5)) AS kd_max');
         if ($userid != null) {
-            $this->db->where('buyer_user_id',$userid);
+            $this->db->where('buyer_user_id', $userid);
             $this->db->where('YEAR(created_time)', $year);
         }
         $q  = $this->db->get('product_order');
@@ -36,7 +35,26 @@ class Morder extends CI_Model
             $kd = "00001";
         }
         // date_default_timezone_set('Asia/Jakarta');
-        return 'ORDER/' . $userid . '/' . $year .'/' . $kd;
+        return 'ORDER/' . $userid . '/' . $year . '/' . $kd;
+    }
+
+    private function _getHistory()
+    {
+        $this->db->select('po.*');
+        $this->db->select('os.status_name');
+        $this->db->select('(SELECT cp.image_product from cart_product cp where cp.no_order = po.no_order limit 1) as image_product');
+        $this->db->join('order_status os', 'os.order_status_id = po.order_status_id', 'left');
+        $this->db->group_by('po.no_order');
+        $this->db->order_by('po.no_order', 'desc');
+    }
+
+    public function getHistory($where = null)
+    {
+        $this->_getHistory();
+        if ($where != null) {
+            $this->db->where($where);
+        }
+        return $this->db->get('product_order po');
     }
 }
 

@@ -131,6 +131,74 @@ class Order extends REST_Controller
         exit;
     }
 
+    public function TanggalIndo($date)
+    {
+        if ($date == null) {
+            $date = date('Y-m-d');
+        }
+        $BulanIndo = array("Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember");
+
+        $tahun = substr($date, 0, 4);
+        $bulan = substr($date, 5, 2);
+        $tgl   = substr($date, 8, 2);
+
+        $result = $tgl . " " . $BulanIndo[(int) $bulan - 1] . " " . $tahun;
+        return ($result);
+    }
+
+    public function cek_tanggal_null($value = '0000-00-00')
+    {
+        if ($value != '0000-00-00' || $value != null) {
+            return $this->TanggalIndo($value);
+        } else {
+            return "-";
+        }
+    }
+
+    public function history_get()
+    {
+        $input = $this->get();
+        $this->db->where('md5(po.buyer_user_id)', $input['user_id']);
+        if (@$input['cari'] != null || @$input['cari'] != '') {
+            $this->db->group_start();
+            $this->db->like('po.no_order', @$input['cari']);
+            $this->db->or_like('po.total', @$input['cari']);
+            $this->db->group_end();
+        }
+        if (@$input['order_status_id'] != null) {
+            $this->db->where('po.order_status_id', @$input['order_status_id']);
+        }
+        $q    = $this->Morder->getHistory();
+        $json = array();
+        foreach ($q->result() as $key) {
+            $r                  = array();
+            $r['no_order']      = $key->no_order;
+            $r['no_order_md5']      = md5($key->no_order);
+            $r['created_time']  = $this->cek_tanggal_null($key->created_time);
+            $r['total']         = (int) $key->total;
+            $r['status_name']   = $key->status_name;
+            $r['image_product'] = $key->image_product;
+            $json[]             = $r;
+        }
+        $this->arr_result = array(
+            'prilude' => array(
+                'data' => $json,
+            ),
+        );
+        $this->response($this->arr_result);
+    }
+
+
+    public function ambilStatus_get()
+    {
+        $q = $this->Mo_sb->mengambil('order_status');
+        $this->arr_result = array(
+            'prilude' => array(
+                'data' => $q->result(),
+            ),
+        );
+        $this->response($this->arr_result);
+    }
 }
 
 /* End of file Order.php */
