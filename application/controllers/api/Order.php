@@ -155,6 +155,32 @@ class Order extends REST_Controller
         }
     }
 
+    public function TanggalIndoKumplit($date)
+    {
+        if ($date == null) {
+            $date = date('Y-m-d H:i:s');
+        }
+        $BulanIndo = array("Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember");
+
+        $tahun  = substr($date, 0, 4);
+        $bulan  = substr($date, 5, 2);
+        $tgl    = substr($date, 8, 2);
+        $jam    = substr($date, 11, 2);
+        $menit  = substr($date, 14, 2);
+        $detik  = substr($date, 17, 2);
+        $result = $tgl . " " . $BulanIndo[(int) $bulan - 1] . " " . $tahun . " " . $jam . ":" . $menit . ":" . $detik;
+        return ($result);
+    }
+
+    public function cek_waktu_null($value)
+    {
+        if ($value != '0000-00-00 00:00:00' && $value != null) {
+            return $this->TanggalIndoKumplit($value);
+        } else {
+            return "Belum ada";
+        }
+    }
+
     public function history_get()
     {
         $input = $this->get();
@@ -173,7 +199,7 @@ class Order extends REST_Controller
         foreach ($q->result() as $key) {
             $r                  = array();
             $r['no_order']      = $key->no_order;
-            $r['no_order_md5']      = md5($key->no_order);
+            $r['no_order_md5']  = md5($key->no_order);
             $r['created_time']  = $this->cek_tanggal_null($key->created_time);
             $r['total']         = (int) $key->total;
             $r['status_name']   = $key->status_name;
@@ -188,13 +214,67 @@ class Order extends REST_Controller
         $this->response($this->arr_result);
     }
 
-
     public function ambilStatus_get()
     {
-        $q = $this->Mo_sb->mengambil('order_status');
+        $q                = $this->Mo_sb->mengambil('order_status');
         $this->arr_result = array(
             'prilude' => array(
                 'data' => $q->result(),
+            ),
+        );
+        $this->response($this->arr_result);
+    }
+
+    private function _detail($where = null)
+    {
+        $this->db->join('order_status os', 'os.order_status_id = po.order_status_id', 'left');
+        $this->db->join('shipping_method sm', 'sm.shipping_method_id = po.shipping_method_id', 'left');
+        if ($where != null) {
+            $this->db->where($where);
+        }
+        return $this->Mo_sb->mengambil('product_order po');
+    }
+
+    public function detail_get()
+    {
+        $input  = $this->get();
+        $status = 'nihil';
+        $data   = $this->_detail(array(
+            'md5(po.no_order)' => @$input['no_order'],
+        ));
+        $detail = $this->Mo_sb->mengambil('cart_product', array(
+            'md5(no_order)' => @$input['no_order'],
+        ));
+
+        if ($data->num_rows() == true) {
+            $status = 'ada';
+        }
+
+        $waw['created_time']  = $this->cek_waktu_null(@$data->row()->created_time);
+        $waw['finished_time'] = $this->cek_waktu_null(@$data->row()->finished_time);
+
+        $this->arr_result = array(
+            'prilude' => array(
+                'status' => $status,
+                'waktu'  => $waw,
+                'po'     => $data->row(),
+                'dt'     => $detail->result(),
+            ),
+        );
+        $this->response($this->arr_result);
+    }
+
+
+    public function batalorder_get()
+    {
+        $input  = $this->get();
+        $q = $this->Mo_sb->mengubah('product_order', array('md5(no_order)' => @$input['no_order']), array(
+            'order_status_id' => 3
+        ));
+
+        $this->arr_result = array(
+            'prilude' => array(
+                'status' => $q['status'],
             ),
         );
         $this->response($this->arr_result);
