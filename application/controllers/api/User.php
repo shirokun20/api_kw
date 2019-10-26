@@ -14,6 +14,7 @@ class User extends REST_Controller
         parent::__construct();
         header("Access-Control-Allow-Origin: *");
         $this->load->library('Libkirim_email');
+        $this->load->library('Libzenzifa');
     }
 
     private function _cek_user($where = null)
@@ -26,12 +27,12 @@ class User extends REST_Controller
         $input = $this->get();
 
         $q = $this->_cek_user(array(
-            'md5(user_id)' => $input['user_id']
+            'md5(user_id)' => $input['user_id'],
         ));
 
         $this->arr_result = array(
             'prilude' => array(
-                'user_detail'  => $q->result(),
+                'user_detail' => $q->result(),
             ),
         );
         $this->response($this->arr_result);
@@ -107,19 +108,25 @@ class User extends REST_Controller
 
     public function daftar_post($user_role_id = 2)
     {
-        $hasilkan               = $this->validasi();
-        $data['full_name']      = ucwords($hasilkan['full_name']);
-        $data['email']          = $hasilkan['email'];
-        $data['password']       = md5($hasilkan['password']);
-        $data['phone']          = $hasilkan['phone'];
-        $data['user_role_id']   = $user_role_id;
-        $data['register_date']  = date('Y-m-d H:i:s');
-        $data['user_status_id'] = 2;
-        $te                     = $this->template_daftar($data['full_name']);
+        $hasilkan                    = $this->validasi();
+        $verification_number         = rand(100000, 999999);
+        $data['full_name']           = ucwords($hasilkan['full_name']);
+        $data['email']               = $hasilkan['email'];
+        $data['password']            = md5($hasilkan['password']);
+        $data['phone']               = $hasilkan['phone'];
+        $data['user_role_id']        = $user_role_id;
+        $data['register_date']       = date('Y-m-d H:i:s');
+        $data['verification_number'] = $verification_number;
+        $data['user_status_id']      = 2;
+        $te                          = $this->template_daftar($data['full_name']);
         $this->libkirim_email->kirim(array(
             'email'   => $data['email'],
             'subject' => $te['subject'],
             'message' => $te['message'],
+        ));
+        $this->libzenzifa->kirimSms(array(
+            'phone'               => $data['phone'],
+            'verification_number' => $data['verification_number'],
         ));
         $q                = $this->Mo_sb->menambah('user', $data);
         $this->arr_result = array(
@@ -223,8 +230,8 @@ class User extends REST_Controller
     public function ambil_user_get()
     {
         $input = $this->get();
-        $q = $this->Mo_sb->mengambil('user', array(
-            'md5(user_id)' => $input['user_id']
+        $q     = $this->Mo_sb->mengambil('user', array(
+            'md5(user_id)' => $input['user_id'],
         ));
         $this->arr_result = array(
             'prilude' => array(
@@ -234,4 +241,57 @@ class User extends REST_Controller
         $this->response($this->arr_result);
     }
 
+    public function ku_get()
+    {
+        $input               = $this->get();
+        $verification_number = rand(100000, 999999);
+        $cebong              = $this->Mo_sb->mengambil('user', array(
+            'email' => @$input['email'],
+        ));
+        $data['verification_number'] = $verification_number;
+        if ($cebong->num_rows() == true) {
+            $this->libzenzifa->kirimSms(array(
+                'phone'               => @$cebong->row()->phone,
+                'verification_number' => $data['verification_number'],
+            ));
+            $this->Mo_sb->mengubah('user', array(
+                'email' => $input['email'],
+            ), array(
+                'verification_number' => $data['verification_number'],
+            ));
+        }
+        $this->arr_result = array(
+            'prilude' => array(
+                'status' => 'ok',
+            ),
+        );
+        $this->response($this->arr_result);
+    }
+
+    public function cekkn_get()
+    {
+        $input  = $this->get();
+        $status = 'gagal';
+        $q      = $this->Mo_sb->mengambil('user', array(
+            'email' => @$input['email'],
+        ));
+        if (@$q->num_rows() == true) {
+            if ($q->row()->verification_number == $input['vn']) {
+                $status = 'berhasil';
+                $this->Mo_sb->mengubah('user', array(
+                    'email' => $input['email'],
+                ), array(
+                    'user_status_id' => 1,
+                ));
+            }
+        }
+
+        $this->arr_result = array(
+            'prilude' => array(
+                'status' => $status,
+                'pesan'  => ucwords($status) . ' verifikasi',
+            ),
+        );
+        $this->response($this->arr_result);
+    }
 }
