@@ -181,6 +181,7 @@ class Product extends REST_Controller
     {
         $input = $this->get();
         $this->db->like('p.product_name', $input['cari']);
+        $this->db->or_like('p.price', $input['cari']);
         $this->db->where('p.is_active', '1');
         $q = $this->_product_category();
         $this->arr_result = array(
