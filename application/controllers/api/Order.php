@@ -279,6 +279,42 @@ class Order extends REST_Controller
         );
         $this->response($this->arr_result);
     }
+
+    public function ambilongir_get()
+    {
+        $input            = $this->get();
+
+        if($input['jarak'] > 2 ){
+            $q = $this->Mo_sb->mengambil('tarif' , array('jarak'=> 2 ))->row();
+        }else{
+            $q = $this->Mo_sb->mengambil('tarif' , array('jarak'=> 1 ))->row();
+        }
+
+        $this->arr_result = array(
+            'prilude' => array(
+                'jarak'  => $q->jarak,
+                'harga'  => $q->harga,
+            ),
+        );
+        $this->response($this->arr_result);
+
+    }
+
+    public function data_method_get()
+    {
+        $input            = $this->get();
+
+        $q                = $this->Mo_sb->mengambil('shipping_method', array('courier_code' => @$input['courier_code'] ));
+       
+        $this->arr_result = array(
+            'prilude' => array(
+                'data' => $q->result(),
+            ),
+        );
+        $this->response($this->arr_result);
+        exit;
+
+    }
 }
 
 /* End of file Order.php */
