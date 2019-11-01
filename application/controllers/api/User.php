@@ -39,6 +39,23 @@ class User extends REST_Controller
         exit;
     }
 
+    // public function address_user_get()
+    // {
+    //     $input = $this->get();
+
+    //     $q = $this->_cek_user_address(array(
+    //         'md5(user_id)' => $input['user_id'],
+    //     ));
+
+    //     $this->arr_result = array(
+    //         'prilude' => array(
+    //             'user_address_detail' => $q->result(),
+    //         ),
+    //     );
+    //     $this->response($this->arr_result);
+    //     exit;
+    // }
+
     private function validasi()
     {
         $input          = $this->post();
