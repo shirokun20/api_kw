@@ -41,6 +41,7 @@ class User extends REST_Controller
 
     private function _cek_user_address($where = null)
     {
+        $this->db->group_by('user_address_id');
         return $this->Mo_sb->mengambil('user_address', $where);
     }
 
