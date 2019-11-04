@@ -80,11 +80,26 @@ class Order extends REST_Controller
                 'product_id' => $key['product_id'],
                 'user_id'    => $user_id,
                 'is_cart'    => '1',
+                'kategori'   => $data['kategori'],
             ), array(
                 'is_cart'  => '2',
                 'no_order' => $no_order,
             ));
         }
+    }
+
+    public function test_post()
+    {
+        $input                        = $this->post();
+        $user_id                      = $input['user_id'];
+        $no_order                     = $this->Morder->noUnik($user_id);
+        $this->arr_result = array(
+            'prilude' => array(
+                'no_order' => $no_order,
+            ),
+        );
+        $this->response($this->arr_result);
+        exit;
     }
 
     public function checkout_post()
@@ -95,6 +110,10 @@ class Order extends REST_Controller
         $q                            = $this->Mo_sb->mengambil('user', array('md5(user_id)' => $user_id));
         $data                         = json_decode($input['bayar'], true);
         $no_order                     = $this->Morder->noUnik($q->row()->user_id);
+        $sti = $data['checkOutRedux']['shipping_time_id'];
+        if ($sti == '') {
+            $sti = null;
+        }
         $insert['no_order']           = $no_order;
         $insert['created_time']       = date('Y-m-d H:i:s');
         $insert['sub_total']          = $total;
@@ -104,8 +123,9 @@ class Order extends REST_Controller
         $insert['shipping_price']     = 0;
         $insert['shipping_price']     = 0;
         $insert['total']              = $total;
-        $insert['shipping_time_id']   = $data['checkOutRedux']['shipping_time_id'];
+        $insert['shipping_time_id']   = $sti;
         $insert['shipping_method_id'] = $data['checkOutRedux']['shipping_method_id'];
+        $insert['payment_method_id']  = $data['checkOutRedux']['payment_method_id'];
         $insert['payment_method_id']  = $data['checkOutRedux']['payment_method_id'];
         $insert['cfm']                = $data['checkOutRedux']['cfm'];
         $insert['address']            = $data['checkOutRedux']['alamat'];
@@ -119,6 +139,7 @@ class Order extends REST_Controller
             $this->cuckdpo(array(
                 'user_id' => $insert['buyer_user_id'],
                 'detail'  => $data['cartKlikWow']['barangNya'],
+                'kategori' => $input['kategori']
             ), $no_order);
         }
         $this->arr_result = array(
