@@ -32,9 +32,13 @@ class Order extends REST_Controller
         $this->db->order_by('created_time', 'desc');
         $this->db->limit(1);
         $q                = $this->Mo_sb->mengambil('product_order', array('md5(buyer_user_id)' => $input['user_id']));
+        // $this->db->order_by('user_address', 'desc');
+        // $this->db->limit(1);
+        // $q_alamat         = $this->Mo_sb->mengambil('user_address', array('user_id' => $input['user_id'] ));
         $this->arr_result = array(
             'prilude' => array(
                 'detail' => $q->result(),
+                // 'alamat_awal' => $q_alamat->result(),
             ),
         );
         $this->response($this->arr_result);
@@ -315,6 +319,38 @@ class Order extends REST_Controller
         exit;
 
     }
+
+    public function user_address_get()
+    {
+        $input            = $this->get();
+        $user_id          = @$input['user_id'];
+        $this->db->order_by('user_address', 'desc');
+        // $this->db->limit(1);
+        $q                = $this->Mo_sb->mengambil('user_address', array('user_id' => $user_id ));
+        $this->arr_result = array(
+            'prilude' => array(
+                'data' => $q->result(),
+            ),
+        );
+        $this->response($this->arr_result);
+        exit;
+    }
+
+    public function user_address_detail_get()
+    {
+        $input            = $this->get();
+        $user_address_id  = @$input['user_address_id'];
+        
+        $q                = $this->Mo_sb->mengambil('user_address', array('user_address_id' => $user_address_id ));
+        $this->arr_result = array(
+            'prilude' => array(
+                'data' => $q->result(),
+            ),
+        );
+        $this->response($this->arr_result);
+        exit;
+    }
+
 }
 
 /* End of file Order.php */
