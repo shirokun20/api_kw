@@ -7,6 +7,7 @@ require APPPATH . 'libraries/Format.php';
 
 class Alamat extends REST_Controller
 {
+    private $arr_result = array();
 
 	    public function alamat_post()
     {
