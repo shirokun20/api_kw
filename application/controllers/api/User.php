@@ -39,22 +39,28 @@ class User extends REST_Controller
         exit;
     }
 
-    // public function address_user_get()
-    // {
-    //     $input = $this->get();
+    private function _cek_user_address($where = null)
+    {
+        $this->db->group_by('user_address_id');
+        return $this->Mo_sb->mengambil('user_address', $where);
+    }
 
-    //     $q = $this->_cek_user_address(array(
-    //         'md5(user_id)' => $input['user_id'],
-    //     ));
+    public function address_user_get()
+    {
+        $input = $this->get();
 
-    //     $this->arr_result = array(
-    //         'prilude' => array(
-    //             'user_address_detail' => $q->result(),
-    //         ),
-    //     );
-    //     $this->response($this->arr_result);
-    //     exit;
-    // }
+        $q = $this->_cek_user_address(array(
+            'md5(user_id)' => $input['user_id'],
+        ));
+
+        $this->arr_result = array(
+            'prilude' => array(
+                'user_address_detail' => $q->result(),
+            ),
+        );
+        $this->response($this->arr_result);
+        exit;
+    }
 
     private function validasi()
     {
