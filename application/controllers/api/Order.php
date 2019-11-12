@@ -372,6 +372,30 @@ class Order extends REST_Controller
         exit;
     }
 
+    public function addressUpdate_post()
+    {
+        $input            = $this->post();
+        $user_address_id  = @$input['user_address_id'];
+
+        $data = array(
+            'user_address'  => @$input['user_address'],
+            'latitude'      => @$input['latitude'],
+            'longitude'     => @$input['longitude'],
+            'district_id'   => @$input['district_id'],
+        );
+        
+        $q                = $this->Mo_sb->mengubah('user_address', array('user_address_id' => $user_address_id ) , $data );
+
+        $this->arr_result = array(
+            'prilude' => array(
+                'status'=> $q['status'],
+                'pesan'  => ucwords($q['status']) . ' melakukan perubahan alamat utama',
+            ),
+        );
+        $this->response($this->arr_result);
+        exit;
+    }
+
 }
 
 /* End of file Order.php */
