@@ -80,6 +80,7 @@ class Layanan extends REST_Controller
                 $r2['category_id'] = $apaYah->category_id;
                 $r2['category_name'] = $apaYah->category_name;
                 $r2['category_name_string'] = $this->toStringUniq($apaYah->category_name);
+                $r2['icon'] = $apaYah->icon;
                 $json_2[] = $r2;
             }
             $r['detail'] = $json_2;
