@@ -45,16 +45,79 @@ class Order extends REST_Controller
         exit;
     }
 
+    private function _cekbarang($product_id, $merchant_id = null)
+    {
+       $where  = array('product_id' => $product_id);
+       if ($merchant_id != null) {
+       		$where['merchant_id'] = $merchant_id;
+       }
+       $q = $this->Mo_sb->mengambil('merchant_product', $where);
+       return $q;
+    }
+
+    public function cekcekbarang($data, $merchant_id = null)
+    {
+    	$dt = array();
+    	foreach ($data['detail'] as $key) {
+    		$r = array();
+    		$cek1 = $this->_cekbarang($key['product_id'], $merchant_id);
+    		$status = 'tidak';
+    		if ($cek1->num_rows() <= 0) {
+    			$cek_2 = $this->_cekbarang($key['product_id']);
+    			if ($cek_2->num_rows() <= 0) {
+    				$status = 'tidak';
+
+    			}else{
+    				$status = 'ada';
+    				$merchant_na = $cek_2->row()->merchant_id;
+    			}
+    		}else{
+    			$status = 'ada';
+    			$merchant_na = $cek1->row()->merchant_id;
+
+    		}
+
+    		// if($status = 'ada'){
+    		// 	$pilih_mitra = $this->Mo_sb->mengambil('merchant')->row();
+    		// }
+
+
+    		$r['status'] 	 = $status;
+    		$r['product_id'] = $key['product_id'];
+    		$r['merchant_id'] = $merchant_na;
+
+    		$dt[] = $r;
+
+           
+        }
+
+        return json_encode(
+        	array(
+        		'status_produk'=>$dt,
+        	)
+        );
+    }
+
     public function searc_mitra_dekat_get()
     {
         $input            = $this->get();
         $lat              = @$input['lat'];
         $lng              = @$input['lng'];
         $q                = $this->Morder->cariMitra($lat, $lng);
+        $barangNya	      = $input['yangDibeli'];
+        $produk 		  =  json_decode($barangNya , true);
+        $id 			  = $produk['barangNya'];
+        $merchant_id  	  = $q->row()->merchant_id;
+
+        $cek = $this->cekcekbarang(array(
+                'detail'  => $produk['barangNya'],
+        ), $merchant_id);
+
         $this->arr_result = array(
             'prilude' => array(
                 'detail' => $q->result(),
                 'jm'     => $this->Mo_sb->mengambil('setting', array('setting_name' => 'JARAK_MAKSIMUM'))->result(),
+                'produk_na' => $cek,
             ),
         );
         $this->response($this->arr_result);
@@ -395,6 +458,40 @@ class Order extends REST_Controller
         $this->response($this->arr_result);
         exit;
     }
+
+    public function _detailMproduk($where = null){
+    	$this->db->join('merchant_product mp', 'mp.merchant_id = m.merchant_id', 'left');
+        if ($where != null) {
+            $this->db->where($where);
+        }
+        return $this->Mo_sb->mengambil('merchant m');
+    }
+
+    // public function cekproduk($data)
+    // {
+    //     $user_id = $data['user_id'];
+
+    //     $data   = $this->_detailMproduk(array(
+    //         'md5(po.no_order)' => @$input['no_order'],
+    //     ));
+
+    //     // $detail = $this->Mo_sb->mengambil('cart_product', array(
+    //     //     'md5(no_order)' => @$input['no_order'],
+    //     // ));
+
+    //     if ($data->num_rows() == true) {
+    //         $status = 'ada';
+    //     }
+
+    //     foreach ($data['detail'] as $key) {
+    //         $q = $this->Mo_sb->mengambil('merchant_product', array(
+    //             'product_id' => $key['product_id'],
+    //             'stok'       => $key['stok'],
+    //         ));
+
+    //     }
+    // }
+
 
 }
 
