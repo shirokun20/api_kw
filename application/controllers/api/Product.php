@@ -165,6 +165,7 @@ class Product extends REST_Controller
             $r['is_gratis_ongkir'] = $key->is_gratis_ongkir;
             $r['is_active']        = $key->is_active;
             $r['price']            = number_format($key->price + 0, 2, ',', '.');
+            $r['price_number']            = (int) $key->price;
             $r['discount']         = $key->discount + 0;
             $r['image_link']       = $duka . $key->image_link;
             $json[] = $r;
