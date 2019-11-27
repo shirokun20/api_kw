@@ -3,7 +3,7 @@ defined('BASEPATH') or exit('No direct script access allowed');
 
 class Morder extends CI_Model
 {
-    public function cariMitra($lat = null, $lng = null)
+    public function cariMitra($lat = null, $lng = null ,$product_id = null)
     {
         $this->db->select('m.*');
         $this->db->limit(5);
@@ -13,6 +13,35 @@ class Morder extends CI_Model
             $this->db->order_by('distance', 'ASC');
             $this->db->having('distance >=', 0);
         }
+        if($product_id != null){
+            $this->db->where( $product_id );
+        }
+        return $this->db->get('merchant m');
+    }
+
+    public function cariMitraDekat($merchant_id , $lat= null , $long = null)
+    {
+        $this->db->select('m.*');
+        $this->db->select('(6371 * acos( cos( radians(' . $lat . ') ) * cos( radians( m.latitude ) ) *
+        cos( radians( m.longitude ) - radians(' . $lng . ') ) + sin( radians(' . $lat . ') ) * sin( radians( m.latitude ) ) ) ) AS distance');
+        $this->db->order_by('distance', 'ASC');
+        $this->db->having('distance >=', 0);
+        if($merchant_id != null){
+            $this->db->where( $merchant_id );
+        }
+
+        return $this->db->get('merchant m');
+    }
+
+    public function cariMitraBYproduk($produk = null)
+    {
+        $this->db->select('m.*');
+       
+        if($produk != null){
+            $this->db->where( $produk );
+        }
+
+        $this->db->join('merchant_product mp', 'mp.merchant_id = m.merchant_id', 'left');
         return $this->db->get('merchant m');
     }
 
@@ -55,6 +84,36 @@ class Morder extends CI_Model
             $this->db->where($where);
         }
         return $this->db->get('product_order po');
+    }
+
+    public function getterdekat($lat = null , $lng = null , $product_id)
+    {
+        $this->db->select('m.*');
+        // $this->db->limit(5);
+        if ($lat != null && $lng != null) {
+            $this->db->select('(6371 * acos( cos( radians(' . $lat . ') ) * cos( radians( m.latitude ) ) *
+        cos( radians( m.longitude ) - radians(' . $lng . ') ) + sin( radians(' . $lat . ') ) * sin( radians( m.latitude ) ) ) ) AS distance');
+            $this->db->order_by('distance', 'ASC');
+            $this->db->having('distance >=', 0);
+        }
+        $where  = array('merchant_product.product_id' => $product_id);
+        $this->db->where_in($where);
+      
+       $this->db->join('merchant m', 'm.merchant_id = merchant_product.merchant_id', 'right');
+       return $this->db->get('merchant_product');
+    }
+
+    public function getUseMitra($product_id)
+    {
+        $this->db->select('
+                SELECT m.merchant_id, mp.jumlah_produk FROM merchant  m
+       INNER JOIN (SELECT product_id,merchant_id, count(product_id) as jumlah_produk
+                     FROM merchant_product where product_id = '5'
+                    GROUP BY merchant_id) mp ON mp.merchant_id = m.merchant_id
+            ');
+        
+        return $this->db->get('merchant_product mp');
+
     }
 }
 

@@ -77,11 +77,6 @@ class Order extends REST_Controller
 
     		}
 
-    		// if($status = 'ada'){
-    		// 	$pilih_mitra = $this->Mo_sb->mengambil('merchant')->row();
-    		// }
-
-
     		$r['status'] 	 = $status;
     		$r['product_id'] = $key['product_id'];
     		$r['merchant_id'] = $merchant_na;
@@ -91,11 +86,7 @@ class Order extends REST_Controller
            
         }
 
-        return json_encode(
-        	array(
-        		'status_produk'=>$dt,
-        	)
-        );
+        return $dt;
     }
 
     public function searc_mitra_dekat_get()
@@ -106,11 +97,11 @@ class Order extends REST_Controller
         $q                = $this->Morder->cariMitra($lat, $lng);
         $barangNya	      = $input['yangDibeli'];
         $produk 		  =  json_decode($barangNya , true);
-        $id 			  = $produk['barangNya'];
+        // $id 			  = $produk['barangNya'];
         $merchant_id  	  = $q->row()->merchant_id;
 
         $cek = $this->cekcekbarang(array(
-                'detail'  => $produk['barangNya'],
+                'detail'  => $produk,
         ), $merchant_id);
 
         $this->arr_result = array(
@@ -123,6 +114,122 @@ class Order extends REST_Controller
         $this->response($this->arr_result);
         exit;
     }
+
+    private function _ambil_lat_long($merchant_id , $lat= null , $long = null)
+    {
+        $q                = $this->Morder->cariMitraDekat($merchant_id);
+
+        return $q;
+    }
+
+    private function _ambilTerdekat($data)
+    {
+        $dt = array();
+        foreach ($data['detail'] as $key) {
+            $r = array();
+            $cek1 = $this->_ambil_lat_long($key['merchant_id'] , $key['latitude'] , $key['longitude'] )->result();
+            $dt[] = $cek1;
+
+        }
+
+        return $dt;
+    }
+
+    public function searc_mitra_by_prod_get()
+    {
+        $input            = $this->get();
+        $data             = @$input['produk'];
+        $lat              = @$input['lat'];
+        $lng              = @$input['lng'];
+        $produk           =  json_decode($data , true);
+        $jml_item = count($produk);
+        $json = array();
+        $json2 = array();
+        foreach ($produk as $key) {
+            $json2[] = array(
+                'pi' => $key['product_id'],
+                'qty' => $key['qty'],
+            );
+            $json[] = $key['product_id'];
+        }
+        $this->db->select("(SELECT COUNT(mps.merchant_id) FROM merchant_product mps WHERE mps.product_id IN('".implode("','", $json)."') AND mps.merchant_id = mp.merchant_id) as jumlah");
+        $this->db->where_in('mp.product_id', $json);
+        $cek_2 = $this->_cekbarang_2($lat, $lng, $jml_item);
+        $penting = array();
+        if ($cek_2->num_rows() == true) {
+            foreach ($cek_2->result() as $key) {
+                if ($jml_item == $key->jumlah) {
+                    $penting[] = $this->_akhir_nya_berhasil($json2, $key);
+                }
+
+                
+            }
+        }
+
+        $this->arr_result = array(
+            'prilude' => array(
+                'detail' => $penting,
+                // 'mitra_terpilih' => $urutkan_jarak,
+            ),
+        );
+        $this->response($this->arr_result);
+        exit;
+    }
+
+    private function _akhir_nya_berhasil($json2, $key)
+    {
+        $json = array();
+        foreach ($json2 as $value) {
+            if ($key->product_id == $value['pi'] && $key->stock >= $value['qty']) {
+                $json = $key;
+            }
+        }
+
+        return $json;
+    }
+
+    public function ambil_stok($data)
+    {
+        $dt = array();
+        foreach ($data['detail'] as $key) {
+            $r = array();
+            $cek = $key['qty'];
+            $dt[] = $cek;
+        }
+
+        return $dt;
+    }
+
+
+    public function ambil_barang($data)
+    {
+        $dt = array();
+        foreach ($data['detail'] as $key) {
+            $dt[] = $key['product_id'];
+        }
+
+        return $dt;
+    }
+
+    private function _cekbarang_2($lat , $lng, $jumlah)
+    {
+        $this->db->select('m.*,mp.product_id,mp.stock');
+        if ($lat != null && $lng != null) {
+            $this->db->select('(6371 * acos( cos( radians(' . $lat . ') ) * cos( radians( m.latitude ) ) *
+        cos( radians( m.longitude ) - radians(' . $lng . ') ) + sin( radians(' . $lat . ') ) * sin( radians( m.latitude ) ) ) ) AS distance');
+            $this->db->order_by('distance', 'ASC');
+            $this->db->having('distance >=', 0);
+        }
+        $this->db->having('jumlah >=', $jumlah);
+        // $this->db->where('mp.stock >=', 2 );
+        // $this->db->group_by('mp.merchant_id');
+        // $this->db->where($product_id);
+        $this->db->join('merchant m', 'm.merchant_id = mp.merchant_id', 'right');
+        $q = $this->db->get('merchant_product mp');
+        return $q;
+    }
+
+    
 
     public function amkw_get()
     {
