@@ -317,4 +317,17 @@ class User extends REST_Controller
         );
         $this->response($this->arr_result);
     }
+
+    public function hapus_alamat_user_post()
+    {
+        $input  = $this->post();
+        $q = $this->Mo_sb->menghapus('user_address', $input);
+        $this->arr_result = array(
+            'prilude' => array(
+                'status' => $q['status'],
+                'pesan' => ucwords($q['status']) . ' menghapus alamat',
+            ),
+        );
+        $this->response($this->arr_result);
+    }
 }
