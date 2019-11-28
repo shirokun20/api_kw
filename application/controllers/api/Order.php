@@ -33,7 +33,7 @@ class Order extends REST_Controller
         $this->db->select('*');
         $this->db->order_by('created_time', 'desc');
         $this->db->limit(1);
-        $q                = $this->Mo_sb->mengambil('product_order', array('md5(buyer_user_id)' => $input['user_id']));
+        $q = $this->Mo_sb->mengambil('product_order', array('md5(buyer_user_id)' => $input['user_id']));
         // $this->db->order_by('user_address', 'desc');
         // $this->db->limit(1);
         // $q_alamat         = $this->Mo_sb->mengambil('user_address', array('user_id' => $input['user_id'] ));
@@ -49,43 +49,42 @@ class Order extends REST_Controller
 
     private function _cekbarang($product_id, $merchant_id = null)
     {
-       $where  = array('product_id' => $product_id);
-       if ($merchant_id != null) {
-       		$where['merchant_id'] = $merchant_id;
-       }
-       $q = $this->Mo_sb->mengambil('merchant_product', $where);
-       return $q;
+        $where = array('product_id' => $product_id);
+        if ($merchant_id != null) {
+            $where['merchant_id'] = $merchant_id;
+        }
+        $q = $this->Mo_sb->mengambil('merchant_product', $where);
+        return $q;
     }
 
     public function cekcekbarang($data, $merchant_id = null)
     {
-    	$dt = array();
-    	foreach ($data['detail'] as $key) {
-    		$r = array();
-    		$cek1 = $this->_cekbarang($key['product_id'], $merchant_id);
-    		$status = 'tidak';
-    		if ($cek1->num_rows() <= 0) {
-    			$cek_2 = $this->_cekbarang($key['product_id']);
-    			if ($cek_2->num_rows() <= 0) {
-    				$status = 'tidak';
+        $dt = array();
+        foreach ($data['detail'] as $key) {
+            $r      = array();
+            $cek1   = $this->_cekbarang($key['product_id'], $merchant_id);
+            $status = 'tidak';
+            if ($cek1->num_rows() <= 0) {
+                $cek_2 = $this->_cekbarang($key['product_id']);
+                if ($cek_2->num_rows() <= 0) {
+                    $status = 'tidak';
 
-    			}else{
-    				$status = 'ada';
-    				$merchant_na = $cek_2->row()->merchant_id;
-    			}
-    		}else{
-    			$status = 'ada';
-    			$merchant_na = $cek1->row()->merchant_id;
+                } else {
+                    $status      = 'ada';
+                    $merchant_na = $cek_2->row()->merchant_id;
+                }
+            } else {
+                $status      = 'ada';
+                $merchant_na = $cek1->row()->merchant_id;
 
-    		}
+            }
 
-    		$r['status'] 	 = $status;
-    		$r['product_id'] = $key['product_id'];
-    		$r['merchant_id'] = $merchant_na;
+            $r['status']      = $status;
+            $r['product_id']  = $key['product_id'];
+            $r['merchant_id'] = $merchant_na;
 
-    		$dt[] = $r;
+            $dt[] = $r;
 
-           
         }
 
         return $dt;
@@ -93,23 +92,23 @@ class Order extends REST_Controller
 
     public function searc_mitra_dekat_get()
     {
-        $input            = $this->get();
-        $lat              = @$input['lat'];
-        $lng              = @$input['lng'];
-        $q                = $this->Morder->cariMitra($lat, $lng);
-        $barangNya	      = $input['yangDibeli'];
-        $produk 		  =  json_decode($barangNya , true);
-        // $id 			  = $produk['barangNya'];
-        $merchant_id  	  = $q->row()->merchant_id;
+        $input     = $this->get();
+        $lat       = @$input['lat'];
+        $lng       = @$input['lng'];
+        $q         = $this->Morder->cariMitra($lat, $lng);
+        $barangNya = $input['yangDibeli'];
+        $produk    = json_decode($barangNya, true);
+        // $id               = $produk['barangNya'];
+        $merchant_id = $q->row()->merchant_id;
 
         $cek = $this->cekcekbarang(array(
-                'detail'  => $produk,
+            'detail' => $produk,
         ), $merchant_id);
 
         $this->arr_result = array(
             'prilude' => array(
-                'detail' => $q->result(),
-                'jm'     => $this->Mo_sb->mengambil('setting', array('setting_name' => 'JARAK_MAKSIMUM'))->result(),
+                'detail'    => $q->result(),
+                'jm'        => $this->Mo_sb->mengambil('setting', array('setting_name' => 'JARAK_MAKSIMUM'))->result(),
                 'produk_na' => $cek,
             ),
         );
@@ -117,9 +116,9 @@ class Order extends REST_Controller
         exit;
     }
 
-    private function _ambil_lat_long($merchant_id , $lat= null , $long = null)
+    private function _ambil_lat_long($merchant_id, $lat = null, $long = null)
     {
-        $q                = $this->Morder->cariMitraDekat($merchant_id);
+        $q = $this->Morder->cariMitraDekat($merchant_id);
 
         return $q;
     }
@@ -128,8 +127,8 @@ class Order extends REST_Controller
     {
         $dt = array();
         foreach ($data['detail'] as $key) {
-            $r = array();
-            $cek1 = $this->_ambil_lat_long($key['merchant_id'] , $key['latitude'] , $key['longitude'] )->result();
+            $r    = array();
+            $cek1 = $this->_ambil_lat_long($key['merchant_id'], $key['latitude'], $key['longitude'])->result();
             $dt[] = $cek1;
 
         }
@@ -139,24 +138,24 @@ class Order extends REST_Controller
 
     public function searc_mitra_by_prod_get()
     {
-        $input            = $this->get();
-        $data             = @$input['produk'];
-        $lat              = @$input['lat'];
-        $lng              = @$input['lng'];
-        $produk           =  json_decode($data , true);
+        $input    = $this->get();
+        $data     = @$input['produk'];
+        $lat      = @$input['lat'];
+        $lng      = @$input['lng'];
+        $produk   = json_decode($data, true);
         $jml_item = count($produk);
-        $json = array();
-        $json2 = array();
+        $json     = array();
+        $json2    = array();
         foreach ($produk as $key) {
             $json2[] = array(
-                'pi' => $key['product_id'],
+                'pi'  => $key['product_id'],
                 'qty' => $key['qty'],
             );
             $json[] = $key['product_id'];
         }
-        $this->db->select("(SELECT COUNT(mps.merchant_id) FROM merchant_product mps WHERE mps.product_id IN('".implode("','", $json)."') AND mps.merchant_id = mp.merchant_id) as jumlah");
+        $this->db->select("(SELECT COUNT(mps.merchant_id) FROM merchant_product mps WHERE mps.product_id IN('" . implode("','", $json) . "') AND mps.merchant_id = mp.merchant_id) as jumlah");
         $this->db->where_in('mp.product_id', $json);
-        $cek_2 = $this->_cekbarang_2($lat, $lng, $jml_item);
+        $cek_2   = $this->_cekbarang_2($lat, $lng, $jml_item);
         $penting = array();
         if ($cek_2->num_rows() == true) {
             foreach ($cek_2->result() as $key) {
@@ -164,13 +163,15 @@ class Order extends REST_Controller
                     $penting[] = $this->_akhir_nya_berhasil($json2, $key);
                 }
 
-                
             }
         }
+        $this->db->select('setting_value');
+        $jm = $this->Mo_sb->mengambil('setting', array('setting_name' => 'JARAK_MAKSIMUM'))->result();
 
         $this->arr_result = array(
             'prilude' => array(
                 'detail' => $penting,
+                'jm'     => $jm,
                 // 'mitra_terpilih' => $urutkan_jarak,
             ),
         );
@@ -194,14 +195,13 @@ class Order extends REST_Controller
     {
         $dt = array();
         foreach ($data['detail'] as $key) {
-            $r = array();
-            $cek = $key['qty'];
+            $r    = array();
+            $cek  = $key['qty'];
             $dt[] = $cek;
         }
 
         return $dt;
     }
-
 
     public function ambil_barang($data)
     {
@@ -213,7 +213,7 @@ class Order extends REST_Controller
         return $dt;
     }
 
-    private function _cekbarang_2($lat , $lng, $jumlah)
+    private function _cekbarang_2($lat, $lng, $jumlah)
     {
         $this->db->select('m.*,mp.product_id,mp.stock');
         if ($lat != null && $lng != null) {
@@ -230,8 +230,6 @@ class Order extends REST_Controller
         $q = $this->db->get('merchant_product mp');
         return $q;
     }
-
-    
 
     public function amkw_get()
     {
@@ -266,9 +264,9 @@ class Order extends REST_Controller
 
     public function test_post()
     {
-        $input                        = $this->post();
-        $user_id                      = $input['user_id'];
-        $no_order                     = $this->Morder->noUnik($user_id);
+        $input            = $this->post();
+        $user_id          = $input['user_id'];
+        $no_order         = $this->Morder->noUnik($user_id);
         $this->arr_result = array(
             'prilude' => array(
                 'no_order' => $no_order,
@@ -280,13 +278,13 @@ class Order extends REST_Controller
 
     public function checkout_post()
     {
-        $input                        = $this->post();
-        $user_id                      = $input['user_id'];
-        $total                        = $input['totalBayar'];
-        $q                            = $this->Mo_sb->mengambil('user', array('md5(user_id)' => $user_id));
-        $data                         = json_decode($input['bayar'], true);
-        $no_order                     = $this->Morder->noUnik($q->row()->user_id);
-        $sti                          = $data['checkOutRedux']['shipping_time_id'];
+        $input    = $this->post();
+        $user_id  = $input['user_id'];
+        $total    = $input['totalBayar'];
+        $q        = $this->Mo_sb->mengambil('user', array('md5(user_id)' => $user_id));
+        $data     = json_decode($input['bayar'], true);
+        $no_order = $this->Morder->noUnik($q->row()->user_id);
+        $sti      = $data['checkOutRedux']['shipping_time_id'];
         if ($sti == '') {
             $sti = null;
         }
@@ -313,9 +311,9 @@ class Order extends REST_Controller
         $q = $this->Mo_sb->menambah('product_order', $insert);
         if ($q['status'] == 'berhasil') {
             $this->cuckdpo(array(
-                'user_id' => $insert['buyer_user_id'],
-                'detail'  => $data['cartKlikWow']['barangNya'],
-                'kategori' => $input['kategori']
+                'user_id'  => $insert['buyer_user_id'],
+                'detail'   => $data['cartKlikWow']['barangNya'],
+                'kategori' => $input['kategori'],
             ), $no_order);
         }
         $this->arr_result = array(
@@ -461,12 +459,11 @@ class Order extends REST_Controller
         $this->response($this->arr_result);
     }
 
-
     public function batalorder_get()
     {
-        $input  = $this->get();
-        $q = $this->Mo_sb->mengubah('product_order', array('md5(no_order)' => @$input['no_order']), array(
-            'order_status_id' => 3
+        $input = $this->get();
+        $q     = $this->Mo_sb->mengubah('product_order', array('md5(no_order)' => @$input['no_order']), array(
+            'order_status_id' => 3,
         ));
 
         $this->arr_result = array(
@@ -479,18 +476,18 @@ class Order extends REST_Controller
 
     public function ambilongir_get()
     {
-        $input            = $this->get();
+        $input = $this->get();
 
-        if($input['jarak'] > 2 ){
-            $q = $this->Mo_sb->mengambil('tarif' , array('jarak'=> 2 ))->row();
-        }else{
-            $q = $this->Mo_sb->mengambil('tarif' , array('jarak'=> 1 ))->row();
+        if ($input['jarak'] > 2) {
+            $q = $this->Mo_sb->mengambil('tarif', array('jarak' => 2))->row();
+        } else {
+            $q = $this->Mo_sb->mengambil('tarif', array('jarak' => 1))->row();
         }
 
         $this->arr_result = array(
             'prilude' => array(
-                'jarak'  => $q->jarak,
-                'harga'  => $q->harga,
+                'jarak' => $q->jarak,
+                'harga' => $q->harga,
             ),
         );
         $this->response($this->arr_result);
@@ -499,10 +496,10 @@ class Order extends REST_Controller
 
     public function data_method_get()
     {
-        $input            = $this->get();
+        $input = $this->get();
 
-        $q                = $this->Mo_sb->mengambil('shipping_method', array('courier_code' => @$input['courier_code'] ));
-       
+        $q = $this->Mo_sb->mengambil('shipping_method', array('courier_code' => @$input['courier_code']));
+
         $this->arr_result = array(
             'prilude' => array(
                 'data' => $q->result(),
@@ -515,11 +512,11 @@ class Order extends REST_Controller
 
     public function user_address_get()
     {
-        $input            = $this->get();
-        $user_id          = @$input['user_id'];
+        $input   = $this->get();
+        $user_id = @$input['user_id'];
         $this->db->order_by('user_address', 'desc');
         // $this->db->limit(1);
-        $q                = $this->Mo_sb->mengambil('user_address', array('user_id' => $user_id ));
+        $q                = $this->Mo_sb->mengambil('user_address', array('user_id' => $user_id));
         $this->arr_result = array(
             'prilude' => array(
                 'data' => $q->result(),
@@ -531,10 +528,10 @@ class Order extends REST_Controller
 
     public function user_address_detail_get()
     {
-        $input            = $this->get();
-        $user_address_id  = @$input['user_address_id'];
-        
-        $q                = $this->Mo_sb->mengambil('user_address', array('user_address_id' => $user_address_id ));
+        $input           = $this->get();
+        $user_address_id = @$input['user_address_id'];
+
+        $q                = $this->Mo_sb->mengambil('user_address', array('user_address_id' => $user_address_id));
         $this->arr_result = array(
             'prilude' => array(
                 'data' => $q->result(),
@@ -546,21 +543,21 @@ class Order extends REST_Controller
 
     public function addressUpdate_post()
     {
-        $input            = $this->post();
-        $user_address_id  = @$input['user_address_id'];
+        $input           = $this->post();
+        $user_address_id = @$input['user_address_id'];
 
         $data = array(
-            'user_address'  => @$input['user_address'],
-            'latitude'      => @$input['latitude'],
-            'longitude'     => @$input['longitude'],
-            'district_id'   => @$input['district_id'],
+            'user_address' => @$input['user_address'],
+            'latitude'     => @$input['latitude'],
+            'longitude'    => @$input['longitude'],
+            'district_id'  => @$input['district_id'],
         );
-        
-        $q                = $this->Mo_sb->mengubah('user_address', array('user_address_id' => $user_address_id ) , $data );
+
+        $q = $this->Mo_sb->mengubah('user_address', array('user_address_id' => $user_address_id), $data);
 
         $this->arr_result = array(
             'prilude' => array(
-                'status'=> $q['status'],
+                'status' => $q['status'],
                 'pesan'  => ucwords($q['status']) . ' melakukan perubahan alamat utama',
             ),
         );
@@ -568,8 +565,36 @@ class Order extends REST_Controller
         exit;
     }
 
-    public function _detailMproduk($where = null){
-    	$this->db->join('merchant_product mp', 'mp.merchant_id = m.merchant_id', 'left');
+    public function addressAdd_post()
+    {
+        $input           = $this->post();
+        $q = $this->Mo_sb->mengambil('user', array('md5(user_id)' => $input['user_id']));
+        $status = 'gagal';
+        if ($q->num_rows() == true) {
+            $status = 'berhasil';
+            $data = array(
+                'user_address' => @$input['user_address'],
+                'user_id' => $q->row()->user_id,
+                'latitude'     => @$input['latitude'],
+                'longitude'    => @$input['longitude'],
+                'district_id'  => @$input['district_id'],
+                'is_home' => 0,
+            );
+            $this->Mo_sb->menambah('user_address', $data);
+        }
+        $this->arr_result = array(
+            'prilude' => array(
+                'status' => $status,
+                'pesan'  => ucwords($status) . ' melakukan menambah alamat ',
+            ),
+        );
+        $this->response($this->arr_result);
+        exit;
+    }
+
+    public function _detailMproduk($where = null)
+    {
+        $this->db->join('merchant_product mp', 'mp.merchant_id = m.merchant_id', 'left');
         if ($where != null) {
             $this->db->where($where);
         }
@@ -591,67 +616,58 @@ class Order extends REST_Controller
     public function simpanGambar_post($no_order = null)
     {
         // $no_order = 'ORDER/45/2019/00002';
-        $input                        = $this->post();
-        
-            $config['upload_path'] = 'uploads/';
-            $config['allowed_types'] = '*';
-            $this->load->library('upload', $config);
-            
-            if($this->upload->do_upload('file'))
-            {
-                //Get uploaded file information
-                $upload_data = $this->upload->data();
-                $fileName = $upload_data['file_name'];
-                
-                //File path at local server
-                $source = 'uploads/'.$fileName;
-                
-                //Load codeigniter FTP class
-                $this->load->library('ftp');
-                
-                //FTP configuration
-                $ftp_config['hostname'] = '103.28.13.87'; 
-                $ftp_config['username'] = 'priludec';
-                $ftp_config['password'] = 'Jbc6tR7b81VP';
-                $ftp_config['debug']    = TRUE;
-                
-                //Connect to the remote server
-                $this->ftp->connect($ftp_config);
-                
-                //File upload path of remote server
-                $destination = '/assets/'.$fileName;
-                
-                //Upload file to the remote server
+        $input = $this->post();
 
-                if($this->ftp->upload($source, ".".$destination)){
-                    
-                    $this->arr_result = array(
+        $config['upload_path']   = 'uploads/';
+        $config['allowed_types'] = '*';
+        $this->load->library('upload', $config);
+
+        if ($this->upload->do_upload('file')) {
+            //Get uploaded file information
+            $upload_data = $this->upload->data();
+            $fileName    = $upload_data['file_name'];
+
+            //File path at local server
+            $source = 'uploads/' . $fileName;
+
+            //Load codeigniter FTP class
+            $this->load->library('ftp');
+
+            //FTP configuration
+            $ftp_config['hostname'] = '103.28.13.87';
+            $ftp_config['username'] = 'priludec';
+            $ftp_config['password'] = 'Jbc6tR7b81VP';
+            $ftp_config['debug']    = true;
+
+            //Connect to the remote server
+            $this->ftp->connect($ftp_config);
+
+            //File upload path of remote server
+            $destination = '/assets/' . $fileName;
+
+            //Upload file to the remote server
+
+            if ($this->ftp->upload($source, "." . $destination)) {
+
+                $this->arr_result = array(
                     'prilude' => array(
-                        'status'=> "berhasil",
+                        'status' => "berhasil",
                         'pesan'  => ucwords('apa') . ' melakukan perubahan alamat utama',
                     ),
                 );
                 $this->response($this->arr_result);
                 exit;
 
-                }
-                
-                //Close FTP connection
-                $this->ftp->close();
-
-                 
-                
-                //Delete file from local server
-                @unlink($source);
             }
 
-        
-                 
-        
+            //Close FTP connection
+            $this->ftp->close();
+
+            //Delete file from local server
+            @unlink($source);
+        }
+
     }
-
-    
-
 
 }
 

@@ -19,92 +19,76 @@ class Setting extends REST_Controller
     {
         // $input = $this->post();
 
-        $q = $this->Mo_sb->mengambil('setting',array('setting_id'=> 7) ) ;
+        $q = $this->Mo_sb->mengambil('setting', array('setting_id' => 7));
 
         if ($q->num_rows() > 0) {
 
-            $this->arr_result   = array(
-                    'prilude'   => array(
-                        'status'    => 'berhasil',
-                        'data'      => $q->result(),
-                )
+            $this->arr_result = array(
+                'prilude' => array(
+                    'status' => 'berhasil',
+                    'data'   => $q->result(),
+                ),
             );
 
-            } else {
+        } else {
 
-                $this->arr_result = array(
-                    'prilude' => array(
-                        'status' => 'gagal',
-                        'pesan'  => 'Data Tidak Ada',
-                    ),
-                );
+            $this->arr_result = array(
+                'prilude' => array(
+                    'status' => 'gagal',
+                    'pesan'  => 'Data Tidak Ada',
+                ),
+            );
 
-            }
-
-            $this->response($this->arr_result);
-            exit;
         }
 
+        $this->response($this->arr_result);
+        exit;
+    }
 
-            public function ambil_setting_all8_get()
+    public function ambil_setting_all8_get()
     {
         // $input = $this->post();
 
-        $q = $this->Mo_sb->mengambil('setting',array('setting_id'=> 8) ) ;
+        $q = $this->Mo_sb->mengambil('setting', array('setting_id' => 8));
 
         if ($q->num_rows() > 0) {
 
-            $this->arr_result   = array(
-                    'prilude'   => array(
-                        'status'    => 'berhasil',
-                        'data'      => $q->result(),
-                )
+            $this->arr_result = array(
+                'prilude' => array(
+                    'status' => 'berhasil',
+                    'data'   => $q->result(),
+                ),
             );
 
-            } else {
+        } else {
 
-                $this->arr_result = array(
-                    'prilude' => array(
-                        'status' => 'gagal',
-                        'pesan'  => 'Data Tidak Ada',
-                    ),
-                );
+            $this->arr_result = array(
+                'prilude' => array(
+                    'status' => 'gagal',
+                    'pesan'  => 'Data Tidak Ada',
+                ),
+            );
 
-            }
-
-            $this->response($this->arr_result);
-            exit;
         }
+
+        $this->response($this->arr_result);
+        exit;
+    }
 
     public function ambil_data_bank_get()
     {
-        // $input = $this->post();
-        $where = array('1', '4');
-        $this->db->where_not_in('payment_method_id',  $where);
-        $q = $this->Mo_sb->mengambil('payment_method') ;
+        $input = $this->get();
+        $q = $this->Mo_sb->mengambil('merchant_bank', array(
+            'merchant_id' => @$input['merchant_id'],
+        ));
 
-        if ($q->num_rows() > 0) {
-
-            $this->arr_result   = array(
-                    'prilude'   => array(
-                        'status'    => 'berhasil',
-                        'data'      => $q->result(),
-                )
-            );
-
-            } else {
-
-                $this->arr_result = array(
-                    'prilude' => array(
-                        'status' => 'gagal',
-                        'pesan'  => 'Data Tidak Ada',
-                    ),
-                );
-
-            }
-
-            $this->response($this->arr_result);
-            exit;
-        }
-
+        $this->arr_result   = array(
+                'prilude'   => array(
+                    'data'      => $q->result(),
+            )
+        );
+        $this->response($this->arr_result);
+        exit;
     }
+
+}
