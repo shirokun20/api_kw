@@ -15,9 +15,11 @@ class Order extends REST_Controller
     public function __construct()
     {
         parent::__construct();
+        header('Content-Type: application/json; charset=utf-8');
         header("Access-Control-Allow-Origin: *");
         $this->load->model('Morder');
         date_default_timezone_set("Asia/Bangkok");
+        header("Access-Control-Allow-Methods: PUT, GET, POST");
     }
 
     public function index($offset = 0)
@@ -284,7 +286,7 @@ class Order extends REST_Controller
         $q                            = $this->Mo_sb->mengambil('user', array('md5(user_id)' => $user_id));
         $data                         = json_decode($input['bayar'], true);
         $no_order                     = $this->Morder->noUnik($q->row()->user_id);
-        $sti = $data['checkOutRedux']['shipping_time_id'];
+        $sti                          = $data['checkOutRedux']['shipping_time_id'];
         if ($sti == '') {
             $sti = null;
         }
@@ -294,17 +296,17 @@ class Order extends REST_Controller
         $insert['order_status_id']    = 1;
         $insert['buyer_user_id']      = $q->row()->user_id;
         $insert['discount']           = 0;
-        $insert['shipping_price']     = 0;
-        $insert['shipping_price']     = 0;
+        $insert['shipping_price']     = $data['checkOutRedux']['ongkir'];
         $insert['total']              = $total;
         $insert['shipping_time_id']   = $sti;
+        $insert['merchant_id']        = $data['checkOutRedux']['merchant_id'];
         $insert['shipping_method_id'] = $data['checkOutRedux']['shipping_method_id'];
         $insert['payment_method_id']  = $data['checkOutRedux']['payment_method_id'];
         $insert['payment_method_id']  = $data['checkOutRedux']['payment_method_id'];
         $insert['cfm']                = $data['checkOutRedux']['cfm'];
-        $insert['address']            = $data['checkOutRedux']['alamat'];
-        $insert['latitude']           = $data['checkOutRedux']['lokasi']['lat'];
-        $insert['longitude']          = $data['checkOutRedux']['lokasi']['lng'];
+        $insert['address']            = $data['checkOutRedux']['awal_alamat']['awal_alamat'];
+        $insert['latitude']           = $data['checkOutRedux']['awal_alamat']['lat_awal'];
+        $insert['longitude']          = $data['checkOutRedux']['awal_alamat']['long_awal'];
         if ($data['checkOutRedux']['shipping_time_id'] == '3') {
             $insert['shipping_schedule'] = ($data['checkOutRedux']['tanggal'] . ' ' . $data['checkOutRedux']['waktu'] . ':00');
         }
@@ -574,30 +576,81 @@ class Order extends REST_Controller
         return $this->Mo_sb->mengambil('merchant m');
     }
 
-    // public function cekproduk($data)
-    // {
-    //     $user_id = $data['user_id'];
+    private function _upload()
+    {
+        $nmfile                  = "produkImg_" . time();
+        $config['upload_path']   = 'http://prilude.com/apps/klikwaw/kwkonsumen/static/media/';
+        $config['allowed_types'] = 'gif|jpg|png|jpeg|bmp|GIF|JPG|PNG|JPEG|BMP|';
+        $config['max_size']      = '10000';
+        $config['max_width']     = '100000';
+        $config['max_height']    = '100000';
+        $config['file_name']     = $nmfile;
+        $this->upload->initialize($config);
+    }
 
-    //     $data   = $this->_detailMproduk(array(
-    //         'md5(po.no_order)' => @$input['no_order'],
-    //     ));
+    public function simpanGambar_post($no_order = null)
+    {
+        // $no_order = 'ORDER/45/2019/00002';
+        $input                        = $this->post();
+        
+            $config['upload_path'] = 'uploads/';
+            $config['allowed_types'] = '*';
+            $this->load->library('upload', $config);
+            
+            if($this->upload->do_upload('file'))
+            {
+                //Get uploaded file information
+                $upload_data = $this->upload->data();
+                $fileName = $upload_data['file_name'];
+                
+                //File path at local server
+                $source = 'uploads/'.$fileName;
+                
+                //Load codeigniter FTP class
+                $this->load->library('ftp');
+                
+                //FTP configuration
+                $ftp_config['hostname'] = '103.28.13.87'; 
+                $ftp_config['username'] = 'priludec';
+                $ftp_config['password'] = 'Jbc6tR7b81VP';
+                $ftp_config['debug']    = TRUE;
+                
+                //Connect to the remote server
+                $this->ftp->connect($ftp_config);
+                
+                //File upload path of remote server
+                $destination = '/assets/'.$fileName;
+                
+                //Upload file to the remote server
 
-    //     // $detail = $this->Mo_sb->mengambil('cart_product', array(
-    //     //     'md5(no_order)' => @$input['no_order'],
-    //     // ));
+                if($this->ftp->upload($source, ".".$destination)){
+                    
+                    $this->arr_result = array(
+                    'prilude' => array(
+                        'status'=> "berhasil",
+                        'pesan'  => ucwords('apa') . ' melakukan perubahan alamat utama',
+                    ),
+                );
+                $this->response($this->arr_result);
+                exit;
 
-    //     if ($data->num_rows() == true) {
-    //         $status = 'ada';
-    //     }
+                }
+                
+                //Close FTP connection
+                $this->ftp->close();
 
-    //     foreach ($data['detail'] as $key) {
-    //         $q = $this->Mo_sb->mengambil('merchant_product', array(
-    //             'product_id' => $key['product_id'],
-    //             'stok'       => $key['stok'],
-    //         ));
+                 
+                
+                //Delete file from local server
+                @unlink($source);
+            }
 
-    //     }
-    // }
+        
+                 
+        
+    }
+
+    
 
 
 }
