@@ -231,10 +231,28 @@ class Order extends REST_Controller
         return $q;
     }
 
+    private function _amkw_shipping($where) {
+        $this->db->join('category c', 'cs.category_id = c.category_id', 'left');
+        $this->db->join('shipping_method sm', 'cs.shipping_method_id = sm.shipping_method_id', 'left');
+        return $this->Mo_sb->mengambil('category_shipping cs', $where);
+    }
+
+    private function _awkw_timing($where) {
+        $this->db->join('category c', 'ct.category_id = c.category_id', 'left');
+        $this->db->join('shipping_timing st', 'ct.shipping_time_id = st.shipping_time_id', 'left');
+        return $this->Mo_sb->mengambil('category_timing ct', $where);
+    }
+
     public function amkw_get()
     {
-        $q                = $this->Mo_sb->mengambil('shipping_method', array('shipping_method_id >' => 1));
-        $q2               = $this->Mo_sb->mengambil('shipping_timing');
+        $input = $this->input->get();
+        $q                = $this->_amkw_shipping(array(
+            'c.category_name' => @$input['category_name']
+        ));
+        $q2               = $this->_awkw_timing(
+        array(
+            'c.category_name' => @$input['category_name']
+        ));
         $this->arr_result = array(
             'prilude' => array(
                 'metode_kirim' => $q->result(),
@@ -497,7 +515,6 @@ class Order extends REST_Controller
     public function data_method_get()
     {
         $input = $this->get();
-
         $q = $this->Mo_sb->mengambil('shipping_method', array('courier_code' => @$input['courier_code']));
 
         $this->arr_result = array(
