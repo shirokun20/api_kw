@@ -620,8 +620,8 @@ class Order extends REST_Controller
 
     private function _upload()
     {
-        $nmfile                  = "produkImg_" . time();
-        $config['upload_path']   = 'http://prilude.com/apps/klikwaw/kwkonsumen/static/media/';
+        $nmfile                  = "BuktiBayar_" . time();
+        $config['upload_path']   = './../kwkonsumen/static/media/';
         $config['allowed_types'] = 'gif|jpg|png|jpeg|bmp|GIF|JPG|PNG|JPEG|BMP|';
         $config['max_size']      = '10000';
         $config['max_width']     = '100000';
@@ -632,58 +632,27 @@ class Order extends REST_Controller
 
     public function simpanGambar_post($no_order = null)
     {
-        // $no_order = 'ORDER/45/2019/00002';
-        $input = $this->post();
-
-        $config['upload_path']   = 'uploads/';
-        $config['allowed_types'] = '*';
-        $this->load->library('upload', $config);
-
+        $no_order = $this->post('no_order');
+        $this->_upload();
+        $status = 'gagal';
         if ($this->upload->do_upload('file')) {
-            //Get uploaded file information
-            $upload_data = $this->upload->data();
-            $fileName    = $upload_data['file_name'];
-
-            //File path at local server
-            $source = 'uploads/' . $fileName;
-
-            //Load codeigniter FTP class
-            $this->load->library('ftp');
-
-            //FTP configuration
-            $ftp_config['hostname'] = '103.28.13.87';
-            $ftp_config['username'] = 'priludec';
-            $ftp_config['password'] = 'Jbc6tR7b81VP';
-            $ftp_config['debug']    = true;
-
-            //Connect to the remote server
-            $this->ftp->connect($ftp_config);
-
-            //File upload path of remote server
-            $destination = '/assets/' . $fileName;
-
-            //Upload file to the remote server
-
-            if ($this->ftp->upload($source, "." . $destination)) {
-
-                $this->arr_result = array(
-                    'prilude' => array(
-                        'status' => "berhasil",
-                        'pesan'  => ucwords('apa') . ' melakukan perubahan alamat utama',
-                    ),
-                );
-                $this->response($this->arr_result);
-                exit;
-
-            }
-
-            //Close FTP connection
-            $this->ftp->close();
-
-            //Delete file from local server
-            @unlink($source);
+            $upload               = $this->upload->data();
+            $data[' bukti_bayar'] = $upload['file_name'];
+            $data['order_status_id']  = '4';
+            $this->Mo_sb->mengubah('product_order', array(
+                'no_order' => $no_order
+            ), $data);
+            $status = 'berhasil';
         }
 
+        $this->arr_result = array(
+            'prilude' => array(
+                'status' => $status,
+                'pesan'  => ucwords($status) . ' mengupload bukti bayar',
+            ),
+        );
+        $this->response($this->arr_result);
+        exit;
     }
 
 }
