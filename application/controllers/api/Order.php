@@ -496,7 +496,7 @@ class Order extends REST_Controller
     {
         $input = $this->get();
 
-        if ($input['jarak'] > 2) {
+        if (@$input['jarak'] > 2) {
             $q = $this->Mo_sb->mengambil('tarif', array('jarak' => 2))->row();
         } else {
             $q = $this->Mo_sb->mengambil('tarif', array('jarak' => 1))->row();
