@@ -12,9 +12,13 @@ class User extends REST_Controller
     public function __construct()
     {
         parent::__construct();
+        header('Content-Type: application/json; charset=utf-8');
         header("Access-Control-Allow-Origin: *");
         $this->load->library('Libkirim_email');
         $this->load->library('Libzenzifa');
+        date_default_timezone_set("Asia/Bangkok");
+        header("Access-Control-Allow-Methods: PUT, GET, POST");
+
     }
 
     private function _cek_user($where = null)
@@ -330,4 +334,67 @@ class User extends REST_Controller
         );
         $this->response($this->arr_result);
     }
+
+    private function _upload()
+    {
+        $nmfile                  = "FotoProfil_" . time();
+        $config['upload_path']   = './../kwkonsumen/static/media/';
+        $config['allowed_types'] = 'gif|jpg|png|jpeg|bmp|GIF|JPG|PNG|JPEG|BMP|';
+        $config['max_size']      = '10000';
+        $config['max_width']     = '100000';
+        $config['max_height']    = '100000';
+        $config['file_name']     = $nmfile;
+        $this->upload->initialize($config);
+    }
+
+    public function simpanFotoProfil_post($user_id = null)
+    {
+        $user_id = $this->post('user_id');
+        $this->_upload();
+        $status = 'gagal';
+        if ($this->upload->do_upload('file')) {
+            $upload               = $this->upload->data();
+            $data[' photo'] = $upload['file_name'];
+            $this->Mo_sb->mengubah('user', array(
+                'user_id' => $user_id
+            ), $data);
+            $status = 'berhasil';
+        }
+
+        $this->arr_result = array(
+            'prilude' => array(
+                'status' => $status,
+                'pesan'  => ucwords($status) . ' mengupload foto profil',
+            ),
+        );
+        $this->response($this->arr_result);
+        exit;
+    }
+
+    public function UbahProfil_post($user_id = null)
+    {
+        $input  = $this->post();
+
+        $user_id           = $input['user_id'];
+        $data['phone']     = $input['phone'];
+        $data['wa_number'] = $input['wa_number'];
+        $data['full_name'] = $input['full_name'];
+
+
+        $q = $this->Mo_sb->mengubah('user', array(
+                'md5(user_id)' => $user_id
+            ), $data);
+
+        
+
+        $this->arr_result = array(
+            'prilude' => array(
+                'status' => $q['status'],
+                'pesan'  => ucwords($q['status']) . ' mengupload foto profil',
+            ),
+        );
+        $this->response($this->arr_result);
+        exit;
+    }
+
 }
