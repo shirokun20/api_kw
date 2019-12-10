@@ -4,10 +4,10 @@
 
 	"default": {
 
-		"host": "103.28.13.87",
-		"username": "priludec",  // or null for anonymous login
-		"password": "Jbc6tR7b81VP",
-		"path": "/public_html/apps/klikwaw/api_kw_mitra/",
+		"host": "ftp.klikwow.com",
+		"username": "klikwow@klikwow.com",  // or null for anonymous login
+		"password": "Prilude_12345",
+		"path": "/apikw/",
 
 		"upload_on_save": true, // set *false* if you do not want to upload on save!
 

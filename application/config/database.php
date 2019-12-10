@@ -75,10 +75,10 @@ $query_builder = TRUE;
 
 $db['default'] = array(
 	'dsn'	=> '',
-  	'hostname' => '103.28.13.87',
-	'username' => 'priludec_20998',
-	'password' => 'khoirul20998',
-	'database' => 'priludec_klikwow',
+  	'hostname' => 'localhost',
+	'username' => 'klikwow_db',
+	'password' => 'Prilude_12345',
+	'database' => 'klikwow_db',
 	'dbdriver' => 'mysqli',
 	'dbprefix' => '',
 	'pconnect' => FALSE,
