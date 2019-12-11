@@ -120,7 +120,7 @@ class Product extends REST_Controller
         $q     = $this->_product_category($where);
         $json  = array();
         foreach ($q->result() as $key) {
-            $duka = 'http://prilude.com/apps/klikwaw/kwkonsumen/static/media/';
+            $duka = 'http://klikwow.com/static/media/';
             $r                     = array();
             $r['product_id']       = $key->product_id;
             $r['product_name']     = ucwords($key->product_name);

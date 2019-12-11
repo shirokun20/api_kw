@@ -8,7 +8,7 @@ require APPPATH . 'libraries/Format.php';
 class Layanan extends REST_Controller
 {
     private $arr_result = array();
-    private $link = 'http://www.prilude.com/apps/klikwaw/kwkonsumen/static/media/';
+    private $link = 'http://klikwow.com/static/media/';
     public function __construct()
     {
         parent::__construct();
