@@ -26,26 +26,27 @@ class Cart extends REST_Controller
 
     }
 
-    private function switch_cart($user_id, $type, $data = NULL)
+    private function switch_cart($user_id, $type, $isLogin, $data = NULL)
     {
         switch ($type) {
             case 'TAMBAH_ITEM':
                 $hasil            = json_decode($data['barangNya'], true);
                 $hasil['user_id'] = $user_id;
-                $cek              = $this->Mo_sb->mengambil('cart_product', array(
+                $hasil['ip_address'] = $this->getUserIpAddr();
+                $where = array(
                     'product_id' => $hasil['product_id'],
-                    'user_id'    => $hasil['user_id'],
                     'is_cart'    => '1',
-                ));
-
+                );
+                if ($user_id === md5($this->getUserIpAddr())) {
+                    $where['ip_address'] = $this->getUserIpAddr();
+                } else {
+                    $where['user_id'] = $user_id;
+                }
+                $cek              = $this->Mo_sb->mengambil('cart_product', $where);
                 if ($cek->num_rows() == false) {
                     $q = $this->Mo_sb->menambah('cart_product', $hasil);
                 } else {
-                    $q = $this->Mo_sb->mengubah('cart_product', array(
-                        'user_id'    => $hasil['user_id'],
-                        'product_id' => $hasil['product_id'],
-                        'is_cart'    => '1'
-                    ), $hasil);
+                    $q = $this->Mo_sb->mengubah('cart_product', $where, $hasil);
                 }
                 return $q;
                 break;
@@ -67,10 +68,23 @@ class Cart extends REST_Controller
                 return $q;
                 break;
             case 'AMBIL_CART':
-            	$q = $this->Mo_sb->mengambil('cart_product', array(
-            		'user_id' => $user_id,
+                $where = array(
                     'is_cart' => '1',
-            	));
+                );
+                if ($isLogin == true) {
+                    $this->Mo_sb->mengubah('cart_product', array(
+                        'is_cart' => '1',
+                        'ip_address' => $this->getUserIpAddr()
+                    ), array(
+                        'user_id' => $user_id,
+                    ));
+                }
+                if ($user_id === md5($this->getUserIpAddr())) {
+                    $where['ip_address'] = $this->getUserIpAddr();
+                } else {
+                    $where['user_id'] = $user_id;
+                }
+            	$q = $this->Mo_sb->mengambil('cart_product', $where);
             	$json = array();
             	foreach ($q->result() as $key) {
             		$r = array();
@@ -100,21 +114,50 @@ class Cart extends REST_Controller
     public function masuk_post()
     {
         $input            = $this->post();
+        $userNya = 0;
         $userID           = $this->Mo_sb->mengambil('user', array('md5(user_id)' => $input['user_id']));
-        $hasil            = $this->switch_cart($userID->row()->user_id, $input['type'], $input);
+        if ($userID->num_rows() == true) {
+            $userNya = $userID->row()->user_id;
+            $isLogin = true;
+        }else{
+            $userNya = md5($this->getUserIpAddr());
+            $isLogin = false;
+        }
+        $hasil            = $this->switch_cart($userNya, $input['type'], $isLogin, $input);
         $this->arr_result = array(
             'prilude' => array(
-                'status' => $hasil['status'],
+                'status' => 'berhasil',
             ),
         );
         $this->response($this->arr_result);
     }
 
+    function getUserIpAddr(){
+      if(!empty($_SERVER['HTTP_CLIENT_IP'])){
+          //ip from share internet
+          $ip = $_SERVER['HTTP_CLIENT_IP'];
+      }elseif(!empty($_SERVER['HTTP_X_FORWARDED_FOR'])){
+          //ip pass from proxy
+          $ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
+      }else{
+          $ip = $_SERVER['REMOTE_ADDR'];
+      }
+      return $ip;
+  }
+
     public function ambil_get()
     {
     	$input = $this->get();
+        $userNya = 0;
         $userID           = $this->Mo_sb->mengambil('user', array('md5(user_id)' => $input['user_id']));
-        $hasil = $this->switch_cart($userID->row()->user_id, $input['type']);
+        if ($userID->num_rows() == true) {
+            $userNya = $userID->row()->user_id;
+            $isLogin = true;
+        }else{
+            $userNya = md5($this->getUserIpAddr());
+            $isLogin = false;
+        }
+        $hasil = $this->switch_cart($userNya, $input['type'], $isLogin);
     	$this->arr_result = array(
     	    'prilude' => array(
     	        'data' => $hasil,
