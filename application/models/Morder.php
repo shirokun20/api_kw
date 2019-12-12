@@ -108,7 +108,7 @@ class Morder extends CI_Model
         $this->db->select('
                 SELECT m.merchant_id, mp.jumlah_produk FROM merchant  m
        INNER JOIN (SELECT product_id,merchant_id, count(product_id) as jumlah_produk
-                     FROM merchant_product where product_id = '5'
+                     FROM merchant_product where product_id = 5
                     GROUP BY merchant_id) mp ON mp.merchant_id = m.merchant_id
             ');
         

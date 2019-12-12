@@ -279,12 +279,12 @@ class User extends REST_Controller
         if ($cebong->num_rows() == true) {
             $this->libzenzifa->kirimSms(array(
                 'phone'               => @$cebong->row()->phone,
-                'verification_number' => $data['verification_number'],
+                'verification_number' => @$cebong->row()->verification_number,
             ));
             $this->Mo_sb->mengubah('user', array(
                 'email' => $input['email'],
             ), array(
-                'verification_number' => $data['verification_number'],
+                'verification_number' => @$cebong->row()->verification_number,
             ));
         }
         $this->arr_result = array(
