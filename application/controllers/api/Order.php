@@ -18,6 +18,7 @@ class Order extends REST_Controller
         header('Content-Type: application/json; charset=utf-8');
         header("Access-Control-Allow-Origin: *");
         $this->load->model('Morder');
+        $this->load->library('Libzenzifa');
         date_default_timezone_set("Asia/Bangkok");
         header("Access-Control-Allow-Methods: PUT, GET, POST");
     }
@@ -231,13 +232,15 @@ class Order extends REST_Controller
         return $q;
     }
 
-    private function _amkw_shipping($where) {
+    private function _amkw_shipping($where)
+    {
         $this->db->join('category c', 'cs.category_id = c.category_id', 'left');
         $this->db->join('shipping_method sm', 'cs.shipping_method_id = sm.shipping_method_id', 'left');
         return $this->Mo_sb->mengambil('category_shipping cs', $where);
     }
 
-    private function _awkw_timing($where) {
+    private function _awkw_timing($where)
+    {
         $this->db->join('category c', 'ct.category_id = c.category_id', 'left');
         $this->db->join('shipping_timing st', 'ct.shipping_time_id = st.shipping_time_id', 'left');
         return $this->Mo_sb->mengambil('category_timing ct', $where);
@@ -246,13 +249,13 @@ class Order extends REST_Controller
     public function amkw_get()
     {
         $input = $this->input->get();
-        $q                = $this->_amkw_shipping(array(
-            'c.category_name' => @$input['category_name']
+        $q     = $this->_amkw_shipping(array(
+            'c.category_name' => @$input['category_name'],
         ));
-        $q2               = $this->_awkw_timing(
-        array(
-            'c.category_name' => @$input['category_name']
-        ));
+        $q2 = $this->_awkw_timing(
+            array(
+                'c.category_name' => @$input['category_name'],
+            ));
         $this->arr_result = array(
             'prilude' => array(
                 'metode_kirim' => $q->result(),
@@ -294,6 +297,34 @@ class Order extends REST_Controller
         exit;
     }
 
+    public function test_get()
+    {
+        $this->_get_phone_mitra('ORDER-0000001', '23');
+        $this->arr_result = array(
+            'prilude' => array(
+                'status' => 'berhasil',
+            ),
+        );
+        $this->response($this->arr_result);
+        exit;
+    }
+
+    private function _get_phone_mitra($no_order, $merchant_id = null)
+    {
+        $this->db->join('user_wa uw', 'uw.user_id = m.merchant_user_id', 'left');
+        $this->db->where('m.merchant_id', $merchant_id);
+        $this->db->where('uw.wa_number_id !=', null);
+        $q = $this->db->get('merchant m');
+        if ($q->num_rows() == true) {
+            foreach ($q->result() as $key) {
+                $this->libzenzifa->kirimSmsOrder(array(
+                    'phone'    => @$key->wa_number,
+                    'no_order' => @$no_order,
+                ));
+            }
+        }
+    }
+
     public function checkout_post()
     {
         $input    = $this->post();
@@ -333,6 +364,8 @@ class Order extends REST_Controller
                 'detail'   => $data['cartKlikWow']['barangNya'],
                 'kategori' => $input['kategori'],
             ), $no_order);
+
+            $this->_get_phone_mitra($insert['no_order'], $insert['merchant_id']);
         }
         $this->arr_result = array(
             'prilude' => array(
@@ -515,7 +548,7 @@ class Order extends REST_Controller
     public function data_method_get()
     {
         $input = $this->get();
-        $q = $this->Mo_sb->mengambil('shipping_method', array('courier_code' => @$input['courier_code']));
+        $q     = $this->Mo_sb->mengambil('shipping_method', array('courier_code' => @$input['courier_code']));
 
         $this->arr_result = array(
             'prilude' => array(
@@ -584,18 +617,18 @@ class Order extends REST_Controller
 
     public function addressAdd_post()
     {
-        $input           = $this->post();
-        $q = $this->Mo_sb->mengambil('user', array('md5(user_id)' => $input['user_id']));
+        $input  = $this->post();
+        $q      = $this->Mo_sb->mengambil('user', array('md5(user_id)' => $input['user_id']));
         $status = 'gagal';
         if ($q->num_rows() == true) {
             $status = 'berhasil';
-            $data = array(
+            $data   = array(
                 'user_address' => @$input['user_address'],
-                'user_id' => $q->row()->user_id,
+                'user_id'      => $q->row()->user_id,
                 'latitude'     => @$input['latitude'],
                 'longitude'    => @$input['longitude'],
                 'district_id'  => @$input['district_id'],
-                'is_home' => 0,
+                'is_home'      => 0,
             );
             $this->Mo_sb->menambah('user_address', $data);
         }
@@ -636,11 +669,11 @@ class Order extends REST_Controller
         $this->_upload();
         $status = 'gagal';
         if ($this->upload->do_upload('file')) {
-            $upload               = $this->upload->data();
-            $data[' bukti_bayar'] = $upload['file_name'];
-            $data['order_status_id']  = '4';
+            $upload                  = $this->upload->data();
+            $data[' bukti_bayar']    = $upload['file_name'];
+            $data['order_status_id'] = '4';
             $this->Mo_sb->mengubah('product_order', array(
-                'no_order' => $no_order
+                'no_order' => $no_order,
             ), $data);
             $status = 'berhasil';
         }
