@@ -60,11 +60,18 @@ class Cart extends REST_Controller
                 return $q;
                 break;
             case 'HAPUS_ITEM':
-                $q = $this->Mo_sb->menghapus('cart_product', array(
+
+                $data = array(
                     'product_id' => $data['product_id'],
-                    'user_id'    => $user_id,
                     'is_cart'    => '1'
-                ));
+                );
+
+                if ($user_id !== md5($this->getUserIpAddr())) {
+                    $data['user_id'] = $user_id;
+                }else{
+                    $where['ip_address'] = $this->getUserIpAddr();
+                }
+                $q = $this->Mo_sb->menghapus('cart_product', $data);
                 return $q;
                 break;
             case 'AMBIL_CART':
