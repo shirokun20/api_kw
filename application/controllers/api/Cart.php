@@ -77,6 +77,7 @@ class Cart extends REST_Controller
                         'ip_address' => $this->getUserIpAddr()
                     ), array(
                         'user_id' => $user_id,
+                        'ip_address' => '',
                     ));
                 }
                 if ($user_id === md5($this->getUserIpAddr())) {

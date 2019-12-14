@@ -34,7 +34,7 @@ class Libzenzifa
     public function kirimSms($data)
     {
         $telepon    = $data['phone'];
-        $message    = "Terima Kasih, pendaftaran tolong masukan kode verifikasi ini " . $data['verification_number'] . " dan jangan kasih kd tsb kepada orang lain. Klik Wow";
+        $message    = "K0de Pendaftaran Klik Wow Anda adalah ".$data['verification_number'].", RAHASIAKAN K0de Anda.";
         $curlHandle = curl_init();
         curl_setopt($curlHandle, CURLOPT_URL, $this->url);
         curl_setopt($curlHandle, CURLOPT_POSTFIELDS,

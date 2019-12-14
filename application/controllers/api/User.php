@@ -289,7 +289,8 @@ class User extends REST_Controller
         }
         $this->arr_result = array(
             'prilude' => array(
-                'status' => 'ok',
+                'status' => 'berhasil',
+                'pesan'  => 'Berhasil Mengirim Kembali SMS',
             ),
         );
         $this->response($this->arr_result);
@@ -312,11 +313,22 @@ class User extends REST_Controller
                 ));
             }
         }
-
+        $hasilnya = $this->Mo_sb->mengambil('user', array(
+            'email' => $input['email'],
+        ))->row();
+        $dataNya = '';
+        if ($status == 'berhasil') {
+            $dataNya = array(
+                'userID'              => md5(@$hasilnya->user_id),
+                'full_name'           => @$hasilnya->full_name,
+                'verification_number' => @$hasilnya->verification_number,
+            );
+        }
         $this->arr_result = array(
             'prilude' => array(
                 'status' => $status,
                 'pesan'  => ucwords($status) . ' verifikasi',
+                'detail' => $dataNya,
             ),
         );
         $this->response($this->arr_result);
@@ -324,12 +336,12 @@ class User extends REST_Controller
 
     public function hapus_alamat_user_post()
     {
-        $input  = $this->post();
-        $q = $this->Mo_sb->menghapus('user_address', $input);
+        $input            = $this->post();
+        $q                = $this->Mo_sb->menghapus('user_address', $input);
         $this->arr_result = array(
             'prilude' => array(
                 'status' => $q['status'],
-                'pesan' => ucwords($q['status']) . ' menghapus alamat',
+                'pesan'  => ucwords($q['status']) . ' menghapus alamat',
             ),
         );
         $this->response($this->arr_result);
@@ -353,10 +365,10 @@ class User extends REST_Controller
         $this->_upload();
         $status = 'gagal';
         if ($this->upload->do_upload('file')) {
-            $upload               = $this->upload->data();
+            $upload         = $this->upload->data();
             $data[' photo'] = $upload['file_name'];
             $this->Mo_sb->mengubah('user', array(
-                'user_id' => $user_id
+                'user_id' => $user_id,
             ), $data);
             $status = 'berhasil';
         }
@@ -373,19 +385,16 @@ class User extends REST_Controller
 
     public function UbahProfil_post($user_id = null)
     {
-        $input  = $this->post();
+        $input = $this->post();
 
         $user_id           = $input['user_id'];
         $data['phone']     = $input['phone'];
         $data['wa_number'] = $input['wa_number'];
         $data['full_name'] = $input['full_name'];
 
-
         $q = $this->Mo_sb->mengubah('user', array(
-                'md5(user_id)' => $user_id
-            ), $data);
-
-        
+            'md5(user_id)' => $user_id,
+        ), $data);
 
         $this->arr_result = array(
             'prilude' => array(
