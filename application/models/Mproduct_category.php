@@ -10,19 +10,19 @@ class Mproduct_category extends CI_Model
     }
 
      //mendaptakan semua data category product tanpa filter apapun.
+    private function _relasi()
+    {
+        $this->db->join('category c', 'c.category_id = p.category_id', 'left');
+        $this->db->join('product_image pi', 'pi.product_id = p.product_id', 'left');
+        $this->db->group_by('p.product_id');
+    }
+
     public function all_category($category_id = null)
     {
-        $this->db->select('c.*');
-        $this->db->select('p.product_id,p.price,p.discount,pi.image_link,s.services_name');
-        $this->db->join('product p', 'p.category_id = c.category_id');
-        $this->db->join('product_image pi', 'pi.product_id = p.product_id');
-        $this->db->join('services s', 's.services_id = c.services_id');
-        
-        if($category_id !== null){
-            $this->db->where('c.category_id', $category_id);
+        $this->_relasi();
+        if ($category_id != null) {
+            $this->db->where('p.category_id', $category_id);
         }
-
-        $result = $this->db->get('category c');
-        return $result;
+        return $this->db->get('product p');
     }
 }

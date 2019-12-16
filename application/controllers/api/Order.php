@@ -156,6 +156,7 @@ class Order extends REST_Controller
         }
         $this->db->select("(SELECT COUNT(mps.merchant_id) FROM merchant_product mps WHERE mps.product_id IN('" . implode("','", $json) . "') AND mps.merchant_id = mp.merchant_id) as jumlah");
         $this->db->where_in('mp.product_id', $json);
+        $this->db->where('stock >', 0);
         $cek_2   = $this->_cekbarang_2($lat, $lng, $jml_item);
         $penting = array();
         if ($cek_2->num_rows() == true) {
