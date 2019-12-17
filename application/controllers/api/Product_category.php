@@ -22,36 +22,17 @@ class Product_category extends REST_Controller
 
     public function ambil_category_all_get()
     {
-        if ($this->get('cat_id') !== '') {
-
-            $q = $this->Mproduct_category->all_category($this->get('cat_id'));
-
-        } else {
-            $q = $this->Mproduct_category->all_category(20);
-        }
-
-        if ($q->num_rows() > 0) {
-
-            $this->arr_result = array(
-                'prilude' => array(
-                    'status' => 'berhasil',
-                    'data'   => $q->result(),
-                    'pesan'  => 'Berhasil mengambil data',
-                ),
-            );
-
-        } else {
-
-            $this->arr_result = array(
-                'prilude' => array(
-                    'status' => 'gagal',
-                    'pesan'  => 'Data Tidak Ada',
-                    'data'   => null
-                ),
-            );
-
-        }
-
+        $input = $this->get();
+        $where['p.category_id'] = $input['cat_id'];
+        $where['p.product_id !='] = $input['product_id'];
+        $q = $this->Mproduct_category->all_category($where);
+        $this->arr_result = array(
+            'prilude' => array(
+                'status' => 'berhasil',
+                'data'   => $q->result(),
+                'pesan'  => 'Berhasil mengambil data',
+            ),
+        );
         $this->response($this->arr_result);
         exit;
     }

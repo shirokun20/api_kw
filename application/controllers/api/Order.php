@@ -345,19 +345,17 @@ class Order extends REST_Controller
         $insert['buyer_user_id']      = $q->row()->user_id;
         $insert['discount']           = 0;
         $insert['shipping_price']     = $data['checkOutRedux']['ongkir'];
-        $insert['total']              = $total;
+        $insert['total']              = $total + $insert['shipping_price'];
         $insert['shipping_time_id']   = $sti;
-        $insert['merchant_id']        = $data['checkOutRedux']['merchant_id'];
-        $insert['shipping_method_id'] = $data['checkOutRedux']['shipping_method_id'];
-        $insert['payment_method_id']  = $data['checkOutRedux']['payment_method_id'];
-        $insert['payment_method_id']  = $data['checkOutRedux']['payment_method_id'];
-        $insert['cfm']                = $data['checkOutRedux']['cfm'];
-        $insert['address']            = $data['checkOutRedux']['awal_alamat']['awal_alamat'];
-        $insert['latitude']           = $data['checkOutRedux']['awal_alamat']['lat_awal'];
-        $insert['longitude']          = $data['checkOutRedux']['awal_alamat']['long_awal'];
-        if ($data['checkOutRedux']['shipping_time_id'] == '3') {
-            $insert['shipping_schedule'] = ($data['checkOutRedux']['tanggal'] . ' ' . $data['checkOutRedux']['waktu'] . ':00');
-        }
+        $insert['merchant_id']        = @$data['checkOutRedux']['merchant_id'];
+        $insert['shipping_method_id'] = @$data['checkOutRedux']['shipping_method_id'];
+        $insert['payment_method_id']  = @$data['checkOutRedux']['payment_method_id'];
+        $insert['merchant_bank_id']  = @$data['checkOutRedux']['merchant_bank_id'];
+        $insert['cfm']                = @$data['checkOutRedux']['cfm'];
+        $insert['address']            = @$data['checkOutRedux']['awal_alamat']['awal_alamat'];
+        $insert['latitude']           = @$data['checkOutRedux']['awal_alamat']['lat_awal'];
+        $insert['longitude']          = @$data['checkOutRedux']['awal_alamat']['long_awal'];
+        $insert['shipping_schedule'] = (@$data['checkOutRedux']['tanggal'] . ' ' . @$data['checkOutRedux']['waktu'] . ':00');
         $q = $this->Mo_sb->menambah('product_order', $insert);
         if ($q['status'] == 'berhasil') {
             $this->cuckdpo(array(
@@ -447,7 +445,7 @@ class Order extends REST_Controller
             $r                  = array();
             $r['no_order']      = $key->no_order;
             $r['no_order_md5']  = md5($key->no_order);
-            $r['created_time']  = $this->cek_tanggal_null($key->created_time);
+            $r['created_time']  = $this->cek_waktu_null($key->created_time);
             $r['total']         = (int) $key->total;
             $r['status_name']   = $key->status_name;
             $r['image_product'] = $key->image_product;

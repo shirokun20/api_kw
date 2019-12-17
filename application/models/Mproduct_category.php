@@ -17,11 +17,11 @@ class Mproduct_category extends CI_Model
         $this->db->group_by('p.product_id');
     }
 
-    public function all_category($category_id = null)
+    public function all_category($where = null)
     {
         $this->_relasi();
-        if ($category_id != null) {
-            $this->db->where('p.category_id', $category_id);
+        if ($where != null) {
+            $this->db->where($where);
         }
         return $this->db->get('product p');
     }
