@@ -18,17 +18,14 @@ class Mproduct extends CI_Model
         $this->db->join('product_image pi', 'pi.product_id = p.product_id', 'left');
         $this->db->join('category c', 'c.category_id = p.category_id', 'left');
         $this->db->join('services s', 's.services_id = c.services_id', 'left');
-        $this->db->where('is_active', 1);
+        $this->db->where('p.is_active', '1');
         $this->db->group_by('p.product_id');
-        
         if($product_id !== null){
             $this->db->where('p.product_id', $product_id);
         }
-
         if ($limit == null) {
             $this->db->limit(12);
         }
-
         $result = $this->db->get('product p');
         return $result;
     }

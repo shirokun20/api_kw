@@ -24,6 +24,7 @@ class Product_category extends REST_Controller
     {
         $input = $this->get();
         $where['p.category_id'] = $input['cat_id'];
+        $where['p.is_active'] = '1';
         $where['p.product_id !='] = $input['product_id'];
         $q = $this->Mproduct_category->all_category($where);
         $this->arr_result = array(

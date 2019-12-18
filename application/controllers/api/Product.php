@@ -150,6 +150,13 @@ class Product extends REST_Controller
             $where['c.services_id'] = $input['services_id'];
             $where['p.is_active'] = 1;
         }
+        if (@$input['price_one'] != null) {
+            $where['p.price >='] = $input['price_one'];
+        }
+
+        if (@$input['price_two'] != null) {
+            $where['p.price <='] = $input['price_two'];
+        }
 
         $q = $this->Mproduct->product_by_layanan_get($where);
         $json = array();
